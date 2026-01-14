@@ -1,4 +1,8 @@
-// content.js - Smartschool AI Assistent v2.4 (VOLLEDIG: fullscreen help + drag)
+/*This script was made by @superman2775
+Do not use or redistribute this script without permission.
+If you want to use this script, please contact the author.
+Smartschool AI Assistant v1.0.0 */
+
 (function () {
   const SS_AI_STORAGE_KEY = "ss_ai_config_v4";
 
@@ -108,17 +112,29 @@
   }
 
   function init() {
-    const topnav = document.querySelector("header.smsc-topnav nav.topnav");
+    const topnav = document.querySelector("nav.topnav");
     if (!topnav || document.querySelector(".ss-ai-assistant-btn")) return;
 
-    const btn = document.createElement("button");
-    btn.className = "topnav__btn ss-ai-assistant-btn";
-    btn.type = "button";
-    btn.textContent = "Assistent";
-    topnav.appendChild(btn);
-
-    createPanel();
-    btn.addEventListener("click", togglePanel);
+    // ✅ NIEUWE LOGICA: Insert na "Start" button, voor "Ga naar" shortcuts
+    const startBtn = topnav.querySelector(".js-btn-home");
+    const shortcutsWrapper = topnav.querySelector('[data-shortcuts]');
+    
+    if (startBtn && shortcutsWrapper) {
+      const aiBtnWrapper = document.createElement("div");
+      aiBtnWrapper.className = "topnav__btn-wrapper";
+      
+      const aiBtn = document.createElement("button");
+      aiBtn.className = "topnav__btn ss-ai-assistant-btn";
+      aiBtn.type = "button";
+      aiBtn.textContent = "Assistent";
+      aiBtn.title = "AI Assistent";
+      
+      aiBtnWrapper.appendChild(aiBtn);
+      startBtn.parentNode.insertBefore(aiBtnWrapper, shortcutsWrapper);
+      
+      createPanel();
+      aiBtn.addEventListener("click", togglePanel);
+    }
   }
 
   function loadConfig() {
@@ -192,12 +208,12 @@
 
         <h4>Gebruik:</h4>
         <ol>
-          <li>Klik op een 🆓 gratis provider → maak account + API key</li>
+          <li>Klik op een 🆓 gratis provider → maak account aan + maak API key</li>
           <li>Selecteer dezelfde provider in dropdown</li>
           <li>Plak key + model ID → klik <strong>💾 Opslaan</strong></li>
           <li>Stel vraag → <strong>🚀 Verstuur</strong></li>
         </ol>
-        <p><em>API keys blijven lokaal opgeslagen in je browser en worden dus niet gedeeld met anderen, of de maker van Smartschool Assistent.</em></p>
+        <p><em>API keys blijven lokaal opgeslagen in je browser en kunnen dus niet bekeken worden door andere gebruikers of de eigenaar van Smartschool Assistent.</em></p>
       </div>
     `;
 
@@ -294,11 +310,9 @@
       const isHelpOpen = els.helpPanel.style.display === 'block';
       
       if (isHelpOpen) {
-        // Help sluiten → body tonen
         els.helpPanel.style.display = 'none';
         els.body.style.display = 'block';
       } else {
-        // Help openen → body verbergen + help fullscreen
         els.body.style.display = 'none';
         els.helpPanel.style.display = 'block';
       }
@@ -441,6 +455,27 @@
         border-left: 4px solid #3b82f6;
       }
       hr { border: none; height: 1px; background: #e5e7eb; margin: 16px 0; }
+      
+      /* Perfecte Smartschool topnav matching */
+        .ss-ai-assistant-btn {
+        background: #ff510d;
+        color: white;
+        border: 1px solid #ff510d;
+        padding: 10px 16px;
+        border-radius: 6px;
+        font-weight: 500;
+        font-size: 14px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        transition: all 0.2s ease;
+        }
+        .ss-ai-assistant-btn:active {
+        background: ##ff510d;
+        transform: translateY(0);
+        }
+
     `;
     document.head.appendChild(style);
   }
