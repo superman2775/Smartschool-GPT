@@ -46,7 +46,7 @@ Smartschool AI Assistant v1.0.0 */
       website: "https://console.mistral.ai"
     },
     deepseek: {
-      label: "🆓 DeepSeek (gratis)",
+      label: "💰 DeepSeek",
       endpoint: "https://api.deepseek.com/v1/chat/completions",
       keyHeader: "Authorization",
       keyPrefix: "Bearer ",
@@ -75,7 +75,7 @@ Smartschool AI Assistant v1.0.0 */
       website: "https://www.perplexity.ai"
     },
     xai: {
-      label: "🆓 xAI Grok (gratis tier)",
+      label: "💰 xAI Grok (gratis met X Premium+)",
       endpoint: "https://api.x.ai/v1/chat/completions",
       keyHeader: "Authorization",
       keyPrefix: "Bearer ",
@@ -200,9 +200,7 @@ Smartschool AI Assistant v1.0.0 */
         <div class="ss-ai-help-grid">
           <div><strong>🆓 <a href="https://console.groq.com" target="_blank">Groq</a></strong><br><code>llama-3.3-70b-versatile</code> (1M tokens/dag)</div>
           <div><strong>🆓 <a href="https://aistudio.google.com" target="_blank">Google AI Studio</a></strong><br><code>gemini-2.5-flash</code> (15 RPM)</div>
-          <div><strong>🆓 <a href="https://platform.deepseek.com" target="_blank">DeepSeek</a></strong><br><code>deepseek-chat</code></div>
           <div><strong>🆓 <a href="https://api.together.xyz" target="_blank">Together AI</a></strong><br><code>meta-llama/Llama-3.3-70B</code></div>
-          <div><strong>🆓 <a href="https://console.x.ai" target="_blank">xAI Grok</a></strong><br><code>grok-beta</code></div>
           <div><strong>🆓 <a href="https://openrouter.ai" target="_blank">OpenRouter</a></strong><br><code>qwen/qwen-2.5-coder</code></div>
         </div>
 
