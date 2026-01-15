@@ -11,7 +11,14 @@ Smartschool AI Assistant v1.0.0 */
     try {
       return JSON.parse(localStorage.getItem(SS_AI_SETTINGS_KEY) || "{}");
     } catch {
-      return { buttonText: "Assistent", aiStyle: "beleefd", saveHistory: true };
+      return { 
+        buttonText: "Assistent",
+        aiStyle: "beleefd",
+        saveHistory: true,
+        userName: "",
+        userRole: "",
+        userExtra: ""
+      };
     }
   }
 
@@ -251,6 +258,14 @@ Smartschool AI Assistant v1.0.0 */
           <input type="checkbox" class="ss-ai-history">
           <span>Gespreksgeschiedenis opslaan (Vorige 20 berichten)</span>
         </label>
+        <label>Persoonlijke gegevens (optioneel)
+          <div class="ss-ai-personal-wrapper">
+            <input class="ss-ai-user-name" placeholder="Naam (bijv. Lisa)">
+            <input class="ss-ai-user-role" placeholder="Rol (bijv. leerling, leraar)">
+            <textarea class="ss-ai-user-extra" rows="2" placeholder="Extra info (bijv. vak, richting, klasgroep)"></textarea>
+            <p class="ss-ai-personal-note"><em>Deze gegevens worden meegestuurd naar de AI om antwoorden te personaliseren. Invullen is volledig vrijblijvend.</em></p>
+          </div>
+        </label>
         <button class="ss-ai-settings-save">💾 Toepassen</button>
         <div class="ss-ai-settings-status"></div>
       </div>
@@ -318,15 +333,20 @@ Smartschool AI Assistant v1.0.0 */
       btnText: panel.querySelector(".ss-ai-btn-text"),
       aiStyle: panel.querySelector(".ss-ai-style"),
       history: panel.querySelector(".ss-ai-history"),
+      userName: panel.querySelector(".ss-ai-user-name"),
+      userRole: panel.querySelector(".ss-ai-user-role"),
+      userExtra: panel.querySelector(".ss-ai-user-extra"),
       settingsSave: panel.querySelector(".ss-ai-settings-save"),
       settingsStatus: panel.querySelector(".ss-ai-settings-status")
     };
 
     const settings = loadSettings();
-      els.btnText.value = settings.buttonText || "Assistent";
-      els.aiStyle.value = settings.aiStyle || "beleefd";
-      els.history.checked = settings.saveHistory !== false;
-
+    els.btnText.value = settings.buttonText || "Assistent";
+    els.aiStyle.value = settings.aiStyle || "beleefd";
+    els.history.checked = settings.saveHistory !== false;
+    if (els.userName) els.userName.value = settings.userName || "";
+    if (els.userRole) els.userRole.value = settings.userRole || "";
+    if (els.userExtra) els.userExtra.value = settings.userExtra || "";
 
 
     els.status.showError = function(msg) {
@@ -389,7 +409,10 @@ Smartschool AI Assistant v1.0.0 */
       const newSettings = {
         buttonText: els.btnText.value.trim() || "Assistent",
         aiStyle: els.aiStyle.value,
-        saveHistory: els.history.checked
+        saveHistory: els.history.checked,
+        userName: (els.userName?.value || "").trim(),
+        userRole: (els.userRole?.value || "").trim(),
+        userExtra: (els.userExtra?.value || "").trim()
       };
       saveSettings(newSettings);
       els.settingsStatus.textContent = "✅ Instellingen opgeslagen";
@@ -420,6 +443,21 @@ Smartschool AI Assistant v1.0.0 */
       const currentSettings = loadSettings();
       const style = currentSettings.aiStyle || "beleefd";
 
+      const personalContextParts = [];
+        if (currentSettings.userName) {
+          personalContextParts.push(`De gebruiker heet ${currentSettings.userName}.`);
+        }
+        if (currentSettings.userRole) {
+          personalContextParts.push(`De gebruiker is een ${currentSettings.userRole}.`);
+        }
+        if (currentSettings.userExtra) {
+          personalContextParts.push(`Extra info over de gebruiker: ${currentSettings.userExtra}.`);
+        }
+        const personalContext = personalContextParts.length
+          ? `\n\nPersoonlijke context gebruiker (voor jou als AI): ${personalContextParts.join(" ")}`
+          : "";
+
+
       const styleText =
         style === "beleefd"
           ? "Gebruik een beleefde, rustige schrijfstijl zoals een behulpzame leerkracht. Gebruik 'u' en 'jij' waar passend in de context."
@@ -427,7 +465,7 @@ Smartschool AI Assistant v1.0.0 */
           ? "Schrijf informeel en persoonlijk, met 'je' en 'jou'. Gebruik emoji's waar passend."
           : "Schrijf direct en zakelijk, zonder overbodige uitleg. Focus op kerninformatie.";
 
-      const styledQuestion = `${question}\n\n${styleText}`;
+      const styledQuestion = `${question}\n\n${styleText}${personalContext}`;
 
       let historyMessages = [];
         if (currentSettings.saveHistory) {
@@ -506,7 +544,7 @@ Smartschool AI Assistant v1.0.0 */
       }
       .ss-ai-panel-open { display: flex; }
       .ss-ai-header {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;
+        background: linear-gradient(135deg, #ff7d0f 0%, #f20800 100%); color: white;
         padding: 12px 16px; border-radius: 12px 12px 0 0; display: flex; justify-content: space-between;
         align-items: center; font-weight: 600; cursor: grab; user-select: none;
       }
@@ -654,6 +692,21 @@ Smartschool AI Assistant v1.0.0 */
         border-radius: 6px;
         font-size: 13px;
         margin-top: 8px;
+      }
+      .ss-ai-personal-wrapper {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        width: 100%;
+      }
+      .ss-ai-personal-wrapper input,
+      .ss-ai-personal-wrapper textarea {
+        width: 100%;
+      }
+      .ss-ai-personal-note {
+        margin: 4px 0 0;
+        font-size: 11px;
+        color: #6b7280;
       }
     `;
     document.head.appendChild(style);
