@@ -5,6 +5,22 @@ Smartschool AI Assistant v1.0.0 */
 
 (function () {
   const SS_AI_STORAGE_KEY = "ss_ai_config_v4";
+  const SS_AI_SETTINGS_KEY = "ss_ai_settings_v1";
+
+  function loadSettings() {
+    try {
+      return JSON.parse(localStorage.getItem(SS_AI_SETTINGS_KEY) || "{}");
+    } catch {
+      return { buttonText: "Assistent", aiStyle: "beleefd", saveHistory: true };
+    }
+  }
+
+  function saveSettings(settings) {
+    try {
+      localStorage.setItem(SS_AI_SETTINGS_KEY, JSON.stringify(settings));
+    } catch {}
+  }
+
 
   const PROVIDERS = {
     groq: {
@@ -26,6 +42,16 @@ Smartschool AI Assistant v1.0.0 */
       type: "openai",
       free: true,
       website: "https://aistudio.google.com"
+    },
+      openrouter: {
+      label: "🆓 OpenRouter (gratis modellen)",
+      endpoint: "https://openrouter.ai/api/v1/chat/completions",
+      keyHeader: "Authorization",
+      keyPrefix: "Bearer ",
+      defaultModel: "qwen/qwen-2.5-7b-instruct",
+      type: "openai",
+      free: true,
+      website: "https://openrouter.ai"
     },
     openai: {
       label: "💰 OpenAI",
@@ -56,7 +82,7 @@ Smartschool AI Assistant v1.0.0 */
       website: "https://platform.deepseek.com"
     },
     together: {
-      label: "🆓 Together AI (gratis tier)",
+      label: "💰 Together AI",
       endpoint: "https://api.together.xyz/v1/chat/completions",
       keyHeader: "Authorization",
       keyPrefix: "Bearer ",
@@ -93,16 +119,6 @@ Smartschool AI Assistant v1.0.0 */
       type: "anthropic",
       website: "https://console.anthropic.com"
     },
-    openrouter: {
-      label: "🆓 OpenRouter (gratis modellen)",
-      endpoint: "https://openrouter.ai/api/v1/chat/completions",
-      keyHeader: "Authorization",
-      keyPrefix: "Bearer ",
-      defaultModel: "google/gemini-2.0-flash-thinking-exp",
-      type: "openai",
-      free: true,
-      website: "https://openrouter.ai"
-    }
   };
 
   if (document.readyState === "loading") {
@@ -115,7 +131,6 @@ Smartschool AI Assistant v1.0.0 */
     const topnav = document.querySelector("nav.topnav");
     if (!topnav || document.querySelector(".ss-ai-assistant-btn")) return;
 
-    // ✅ NIEUWE LOGICA: Insert na "Start" button, voor "Ga naar" shortcuts
     const startBtn = topnav.querySelector(".js-btn-home");
     const shortcutsWrapper = topnav.querySelector('[data-shortcuts]');
     
@@ -123,12 +138,14 @@ Smartschool AI Assistant v1.0.0 */
       const aiBtnWrapper = document.createElement("div");
       aiBtnWrapper.className = "topnav__btn-wrapper";
       
+      const settings = loadSettings();
+
       const aiBtn = document.createElement("button");
       aiBtn.className = "topnav__btn ss-ai-assistant-btn";
       aiBtn.type = "button";
-      aiBtn.textContent = "Assistent";
+      aiBtn.textContent = settings.buttonText || "Assistent";
       aiBtn.title = "AI Assistent";
-      
+
       aiBtnWrapper.appendChild(aiBtn);
       startBtn.parentNode.insertBefore(aiBtnWrapper, shortcutsWrapper);
       
@@ -162,6 +179,7 @@ Smartschool AI Assistant v1.0.0 */
       <div class="ss-ai-header">
         <span>🤖 AI Assistent</span>
         <div class="ss-ai-header-btns">
+          <button class="ss-ai-settings" title="Instellingen">⚙️</button>
           <button class="ss-ai-help" title="Help">?</button>
           <button class="ss-ai-close">×</button>
         </div>
@@ -180,6 +198,8 @@ Smartschool AI Assistant v1.0.0 */
           <input type="password" class="ss-ai-key" placeholder="API key voor provider" />
         </label>
         
+        <p><em>De gebruiker is zelf verantwoordelijk voor zijn/haar API key en de eventuele kosten die hieraan verbonden zijn.</em></p>
+        
         <button class="ss-ai-save">💾 Opslaan</button>
         
         <hr>
@@ -190,6 +210,8 @@ Smartschool AI Assistant v1.0.0 */
         
         <button class="ss-ai-send">🚀 Verstuur</button>
         
+        <p><em>AI antwoorden kunnen fouten bevatten. Controleer belangrijke info.</em></p>
+
         <div class="ss-ai-status"></div>
         <div class="ss-ai-answer"></div>
       </div>
@@ -200,8 +222,7 @@ Smartschool AI Assistant v1.0.0 */
         <div class="ss-ai-help-grid">
           <div><strong>🆓 <a href="https://console.groq.com" target="_blank">Groq</a></strong><br><code>llama-3.3-70b-versatile</code> (1M tokens/dag)</div>
           <div><strong>🆓 <a href="https://aistudio.google.com" target="_blank">Google AI Studio</a></strong><br><code>gemini-2.5-flash</code> (15 RPM)</div>
-          <div><strong>🆓 <a href="https://api.together.xyz" target="_blank">Together AI</a></strong><br><code>meta-llama/Llama-3.3-70B</code></div>
-          <div><strong>🆓 <a href="https://openrouter.ai" target="_blank">OpenRouter</a></strong><br><code>qwen/qwen-2.5-coder</code></div>
+          <div><strong>🆓 <a href="https://openrouter.ai" target="_blank">OpenRouter</a></strong><br><code>qwen/qwen-2.5-7b-instruct</code> or <code>meta-llama/llama-3.2-1b-instruct</code></div>
         </div>
 
         <h4>Gebruik:</h4>
@@ -212,6 +233,26 @@ Smartschool AI Assistant v1.0.0 */
           <li>Stel vraag → <strong>🚀 Verstuur</strong></li>
         </ol>
         <p><em>API keys blijven lokaal opgeslagen in je browser en kunnen dus niet bekeken worden door andere gebruikers of de eigenaar van Smartschool Assistent.</em></p>
+      </div>
+
+      <div class="ss-ai-settings-panel">
+        <h3>⚙️ Instellingen</h3>
+        <label>Knop tekst
+          <input class="ss-ai-btn-text" placeholder="Assistent">
+        </label>
+        <label>Antwoord formulering
+          <select class="ss-ai-style">
+            <option value="beleefd">Beleefd/Formeel</option>
+            <option value="persoonlijk">Persoonlijk/Vriendelijk</option>
+            <option value="direct">Direct/Zakelijk</option>
+          </select>
+        </label>
+        <label>
+          <input type="checkbox" class="ss-ai-history">
+          <span>Gespreksgeschiedenis opslaan (Vorige 20 berichten)</span>
+        </label>
+        <button class="ss-ai-settings-save">💾 Toepassen</button>
+        <div class="ss-ai-settings-status"></div>
       </div>
     `;
 
@@ -271,8 +312,22 @@ Smartschool AI Assistant v1.0.0 */
       close: panel.querySelector(".ss-ai-close"),
       help: panel.querySelector(".ss-ai-help"),
       helpPanel: panel.querySelector(".ss-ai-help-panel"),
-      body: panel.querySelector(".ss-ai-body")
+      body: panel.querySelector(".ss-ai-body"),
+      settingsBtn: panel.querySelector(".ss-ai-settings"),
+      settingsPanel: panel.querySelector(".ss-ai-settings-panel"),
+      btnText: panel.querySelector(".ss-ai-btn-text"),
+      aiStyle: panel.querySelector(".ss-ai-style"),
+      history: panel.querySelector(".ss-ai-history"),
+      settingsSave: panel.querySelector(".ss-ai-settings-save"),
+      settingsStatus: panel.querySelector(".ss-ai-settings-status")
     };
+
+    const settings = loadSettings();
+      els.btnText.value = settings.buttonText || "Assistent";
+      els.aiStyle.value = settings.aiStyle || "beleefd";
+      els.history.checked = settings.saveHistory !== false;
+
+
 
     els.status.showError = function(msg) {
       this.textContent = `❌ ${msg}`;
@@ -302,18 +357,46 @@ Smartschool AI Assistant v1.0.0 */
       panel.classList.remove("ss-ai-panel-open");
       els.body.style.display = "block";
       els.helpPanel.style.display = "none";
+      els.settingsPanel.style.display = "none";
     };
 
     els.help.onclick = () => {
       const isHelpOpen = els.helpPanel.style.display === 'block';
-      
       if (isHelpOpen) {
         els.helpPanel.style.display = 'none';
         els.body.style.display = 'block';
+        els.settingsPanel.style.display = 'none';
       } else {
         els.body.style.display = 'none';
+        els.settingsPanel.style.display = 'none';
         els.helpPanel.style.display = 'block';
       }
+    };
+
+    els.settingsBtn.onclick = () => {
+      const isSettingsOpen = els.settingsPanel.style.display === 'block';
+      if (isSettingsOpen) {
+        els.settingsPanel.style.display = 'none';
+        els.body.style.display = 'block';
+      } else {
+        els.body.style.display = 'none';
+        els.helpPanel.style.display = 'none';
+        els.settingsPanel.style.display = 'block';
+      }
+    };
+
+    els.settingsSave.onclick = () => {
+      const newSettings = {
+        buttonText: els.btnText.value.trim() || "Assistent",
+        aiStyle: els.aiStyle.value,
+        saveHistory: els.history.checked
+      };
+      saveSettings(newSettings);
+      els.settingsStatus.textContent = "✅ Instellingen opgeslagen";
+      els.settingsStatus.className = "ss-ai-status ok";
+
+      const btn = document.querySelector(".ss-ai-assistant-btn");
+      if (btn) btn.textContent = newSettings.buttonText;
     };
 
     els.save.onclick = () => {
@@ -334,6 +417,30 @@ Smartschool AI Assistant v1.0.0 */
       const model = els.model.value.trim() || p.defaultModel;
       const question = els.question.value.trim();
 
+      const currentSettings = loadSettings();
+      const style = currentSettings.aiStyle || "beleefd";
+
+      const styleText =
+        style === "beleefd"
+          ? "Gebruik een beleefde, rustige schrijfstijl zoals een behulpzame leerkracht. Gebruik 'u' en 'jij' waar passend in de context."
+          : style === "persoonlijk"
+          ? "Schrijf informeel en persoonlijk, met 'je' en 'jou'. Gebruik emoji's waar passend."
+          : "Schrijf direct en zakelijk, zonder overbodige uitleg. Focus op kerninformatie.";
+
+      const styledQuestion = `${question}\n\n${styleText}`;
+
+      let historyMessages = [];
+        if (currentSettings.saveHistory) {
+          try {
+            const hist = JSON.parse(localStorage.getItem("ss_ai_history") || "[]");
+            // laatste paar berichten meesturen als context
+            historyMessages = hist.slice(0, 5).map(item => ({
+              role: "user",
+              content: `Vorige vraag: ${item.q}\nJouw antwoord was: ${item.a}`
+            }));
+          } catch {}
+        }
+
       if (!question) return els.status.showError("Geen vraag");
       if (p.keyHeader && !key) return els.status.showError("Geen API key");
 
@@ -350,7 +457,10 @@ Smartschool AI Assistant v1.0.0 */
           headers,
           body: JSON.stringify({
             model,
-            messages: [{ role: "user", content: question }]
+            messages: [
+              ...historyMessages,
+              { role: "user", content: styledQuestion }
+            ]
           })
         });
 
@@ -360,6 +470,17 @@ Smartschool AI Assistant v1.0.0 */
         els.answer.textContent = data.choices?.[0]?.message?.content || JSON.stringify(data, null, 2);
         els.status.textContent = "✅ Klaar";
         els.status.className = "ss-ai-status ok";
+          if (currentSettings.saveHistory) {
+            try {
+              const hist = JSON.parse(localStorage.getItem("ss_ai_history") || "[]");
+              hist.unshift({
+                q: question,
+                a: els.answer.textContent,
+                t: Date.now()
+              });
+              localStorage.setItem("ss_ai_history", JSON.stringify(hist.slice(0, 20)));
+            } catch {}
+          }
       } catch (e) {
         els.status.textContent = `❌ Fout: ${e.message}`;
         els.status.className = "ss-ai-status error";
@@ -391,11 +512,13 @@ Smartschool AI Assistant v1.0.0 */
       }
       .ss-ai-header:active { cursor: grabbing; }
       .ss-ai-header-btns { display: flex; gap: 8px; }
-      .ss-ai-close, .ss-ai-help { 
+      .ss-ai-close, .ss-ai-help, .ss-ai-settings { 
         background: none; border: none; color: white; font-size: 18px; cursor: pointer; 
         padding: 4px 8px; border-radius: 4px; 
       }
-      .ss-ai-close:hover, .ss-ai-help:hover { background: rgba(255,255,255,0.2); }
+      .ss-ai-close:hover, .ss-ai-help:hover, .ss-ai-settings:hover { 
+        background: rgba(255,255,255,0.2); 
+      }
       
       .ss-ai-body { 
         padding: 16px; overflow-y: auto; flex: 1; display: block; 
@@ -473,7 +596,65 @@ Smartschool AI Assistant v1.0.0 */
         background: ##ff510d;
         transform: translateY(0);
         }
-
+        .ss-ai-settings-panel {
+        flex: 1;
+        padding: 20px;
+        overflow-y: auto;
+        display: none;
+        background: #f8fafc;
+        border-top: 1px solid #e0e7ff;
+      }
+      .ss-ai-settings-panel h3 {
+        margin: 0 0 16px;
+        color: #1e40af;
+        font-size: 16px;
+      }
+      .ss-ai-settings-panel label {
+        display: flex;
+        align-items: flex-start;
+        gap: 8px;
+        margin-bottom: 12px;
+        font-size: 13px;
+      }
+      .ss-ai-settings-panel input[type="checkbox"] {
+        width: auto;
+        margin-top: 2px;
+      }
+      .ss-ai-settings-panel span {
+        flex: 1;
+      }
+      .ss-ai-settings-panel input,
+      .ss-ai-settings-panel select {
+        width: 100%;
+        box-sizing: border-box;
+        padding: 8px 10px;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        font-size: 13px;
+        font-family: inherit;
+        margin-top: 4px;
+      }
+      .ss-ai-settings-save {
+        width: 100%;
+        padding: 12px;
+        border: none;
+        border-radius: 6px;
+        font-size: 14px;
+        font-weight: 500;
+        cursor: pointer;
+        margin-top: 4px;
+        background: #f59e0b;
+        color: white;
+      }
+      .ss-ai-settings-save:hover {
+        background: #d97706;
+      }
+      .ss-ai-settings-status {
+        padding: 8px 12px;
+        border-radius: 6px;
+        font-size: 13px;
+        margin-top: 8px;
+      }
     `;
     document.head.appendChild(style);
   }
