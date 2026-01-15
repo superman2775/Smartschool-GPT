@@ -460,10 +460,10 @@ Smartschool AI Assistant v1.0.0 */
 
       const styleText =
         style === "beleefd"
-          ? "Gebruik een beleefde, rustige schrijfstijl zoals een behulpzame leerkracht. Gebruik 'u' en 'jij' waar passend in de context."
+          ? "Gebruik een beleefde, rustige schrijfstijl zoals een behulpzaam persoon. Gebruik 'u' en 'jij' waar passend in de context. Stel amper vragen terug. Werk met voorbeelden en structuur aan de hand van de behoeften van de gebruiker."
           : style === "persoonlijk"
-          ? "Schrijf informeel en persoonlijk, met 'je' en 'jou'. Gebruik emoji's waar passend."
-          : "Schrijf direct en zakelijk, zonder overbodige uitleg. Focus op kerninformatie.";
+          ? "Schrijf informeel en persoonlijk, met 'je' en 'jou'. Gebruik emoji's waar passend. Stel regelmatig vragen terug, maar niet meer dan 2. Wees vriendelijk en behulpzaam, zoals een goede vriend die je wil helpen. Gebruik voorbeelden en anekdotes om je antwoorden te verduidelijken."
+          : "Schrijf direct en zakelijk, zonder overbodige uitleg. Focus op kerninformatie. Werk gestructureerd en puntsgewijs waar mogelijk. Stel geen vragen terug aan de gebruiker. Gebruik geen emoji's.";
 
       const styledQuestion = `${question}\n\n${styleText}${personalContext}`;
 
