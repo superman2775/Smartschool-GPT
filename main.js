@@ -1,7 +1,10 @@
-/*This script was made by @superman2775
-Do not use or redistribute this script without permission.
-If you want to use this script, please contact the author.
-Smartschool AI Assistant v1.0.0 */
+/* Copyright (c) 2026 @superman2775
+ * All rights reserved.
+ *
+ * Permission is granted to use this script for educational purposes only.
+ * Redistribution, modification, or commercial use of this code, in whole or in part,
+ * is prohibited without explicit written permission from the author.
+ */
 
 (function () {
   const SS_AI_STORAGE_KEY = "ss_ai_config_v4";
