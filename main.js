@@ -1,7 +1,7 @@
 /* Copyright (c) 2026 @superman2775
  * All rights reserved.
  *
- * Permission is granted to use this script for educational purposes only.
+ * Permission is granted to use this script for personal and educational purposes only.
  * Redistribution, modification, or commercial use of this code, in whole or in part,
  * is prohibited without explicit written permission from the author.
  */
@@ -20,7 +20,8 @@
         saveHistory: true,
         userName: "",
         userRole: "",
-        userExtra: ""
+        userExtra: "",
+        language: "",
       };
     }
   }
@@ -257,6 +258,12 @@
             <option value="direct">Direct/Zakelijk</option>
           </select>
         </label>
+        <label>Voorkeurstaal
+          <div class="ss-ai-language-wrapper">
+            <input class="ss-ai-language" placeholder="Bijv. Nederlands, English, Français">
+            <p class="ss-ai-personal-note"><em>Laat leeg voor automatische taal op basis van je vraag.</em></p>
+          </div>
+        </label>
         <label>
           <input type="checkbox" class="ss-ai-history">
           <span>Gespreksgeschiedenis opslaan (Vorige 20 berichten)</span>
@@ -265,7 +272,7 @@
           <div class="ss-ai-personal-wrapper">
             <input class="ss-ai-user-name" placeholder="Naam (bijv. Lisa)">
             <input class="ss-ai-user-role" placeholder="Rol (bijv. leerling, leraar)">
-            <textarea class="ss-ai-user-extra" rows="2" placeholder="Extra info (bijv. vak, richting, klasgroep)"></textarea>
+            <textarea class="ss-ai-user-extra" rows="2" placeholder="Extra info (bijv. Doe alsof je een koe bent.)"></textarea>
             <p class="ss-ai-personal-note"><em>Deze gegevens worden meegestuurd naar de AI om antwoorden te personaliseren. Invullen is volledig vrijblijvend.</em></p>
           </div>
         </label>
@@ -339,6 +346,7 @@
       userName: panel.querySelector(".ss-ai-user-name"),
       userRole: panel.querySelector(".ss-ai-user-role"),
       userExtra: panel.querySelector(".ss-ai-user-extra"),
+      language: panel.querySelector(".ss-ai-language"),
       settingsSave: panel.querySelector(".ss-ai-settings-save"),
       settingsStatus: panel.querySelector(".ss-ai-settings-status")
     };
@@ -350,6 +358,7 @@
     if (els.userName) els.userName.value = settings.userName || "";
     if (els.userRole) els.userRole.value = settings.userRole || "";
     if (els.userExtra) els.userExtra.value = settings.userExtra || "";
+    if (els.language) els.language.value = settings.language || "";
 
 
     els.status.showError = function(msg) {
@@ -415,7 +424,8 @@
         saveHistory: els.history.checked,
         userName: (els.userName?.value || "").trim(),
         userRole: (els.userRole?.value || "").trim(),
-        userExtra: (els.userExtra?.value || "").trim()
+        userExtra: (els.userExtra?.value || "").trim(),
+        language: (els.language?.value || "").trim(),
       };
       saveSettings(newSettings);
       els.settingsStatus.textContent = "✅ Instellingen opgeslagen";
@@ -446,6 +456,11 @@
       const currentSettings = loadSettings();
       const style = currentSettings.aiStyle || "beleefd";
 
+      const language = (currentSettings.language || "").trim();
+      const languageText = language
+        ? `Beantwoord altijd in de volgende taal, tenzij de gebruiker expliciet iets anders vraagt: ${language}.`
+        : "";
+
       const personalContextParts = [];
         if (currentSettings.userName) {
           personalContextParts.push(`De gebruiker heet ${currentSettings.userName}.`);
@@ -454,7 +469,7 @@
           personalContextParts.push(`De gebruiker is een ${currentSettings.userRole}.`);
         }
         if (currentSettings.userExtra) {
-          personalContextParts.push(`Extra info over de gebruiker: ${currentSettings.userExtra}.`);
+          personalContextParts.push(`Extra info over hoe je je moet gedragen/wat je moet weten: ${currentSettings.userExtra}.`);
         }
         const personalContext = personalContextParts.length
           ? `\n\nPersoonlijke context gebruiker (voor jou als AI): ${personalContextParts.join(" ")}`
@@ -468,7 +483,7 @@
           ? "Schrijf informeel en persoonlijk, met 'je' en 'jou'. Gebruik emoji's waar passend. Stel regelmatig vragen terug, maar niet meer dan 2. Wees vriendelijk en behulpzaam, zoals een goede vriend die je wil helpen. Gebruik voorbeelden en anekdotes om je antwoorden te verduidelijken."
           : "Schrijf direct en zakelijk, zonder overbodige uitleg. Focus op kerninformatie. Werk gestructureerd en puntsgewijs waar mogelijk. Stel geen vragen terug aan de gebruiker. Gebruik geen emoji's.";
 
-      const styledQuestion = `${question}\n\n${styleText}${personalContext}`;
+      const styledQuestion = `${question}\n\n${styleText}${languageText ? " " + languageText : ""}${personalContext}`;
 
       let historyMessages = [];
         if (currentSettings.saveHistory) {
