@@ -251,6 +251,7 @@
         <label>Knop tekst
           <input class="ss-ai-btn-text" placeholder="Assistent">
         </label>
+        <hr>
         <label>Antwoord formulering
           <select class="ss-ai-style">
             <option value="beleefd">Beleefd/Formeel</option>
@@ -258,16 +259,19 @@
             <option value="direct">Direct/Zakelijk</option>
           </select>
         </label>
+        <hr>
         <label>Voorkeurstaal
           <div class="ss-ai-language-wrapper">
             <input class="ss-ai-language" placeholder="Bijv. Nederlands, English, Français">
             <p class="ss-ai-personal-note"><em>Laat leeg voor automatische taal op basis van je vraag.</em></p>
           </div>
         </label>
+        <hr>
         <label>
           <input type="checkbox" class="ss-ai-history">
           <span>Gespreksgeschiedenis opslaan (Vorige 20 berichten)</span>
         </label>
+        <hr>
         <label>Persoonlijke gegevens (optioneel)
           <div class="ss-ai-personal-wrapper">
             <input class="ss-ai-user-name" placeholder="Naam (bijv. Lisa)">
