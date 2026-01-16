@@ -1,7 +1,7 @@
 /* Copyright (c) 2026 @superman2775
  * All rights reserved.
  *
- * Permission is granted to use this script for personal and educational purposes only.
+ * Permission is granted to use this script for educational purposes only.
  * Redistribution, modification, or commercial use of this code, in whole or in part,
  * is prohibited without explicit written permission from the author.
  */
