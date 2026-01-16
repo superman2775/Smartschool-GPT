@@ -272,7 +272,7 @@
           <span>Gespreksgeschiedenis opslaan (Vorige 20 berichten)</span>
         </label>
         <hr>
-        <label>Persoonlijke gegevens (optioneel)
+        <label>Extra gegevens (optioneel)
           <div class="ss-ai-personal-wrapper">
             <input class="ss-ai-user-name" placeholder="Naam (bijv. Lisa)">
             <input class="ss-ai-user-role" placeholder="Rol (bijv. leerling, leraar)">
