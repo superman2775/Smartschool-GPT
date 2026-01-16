@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "Smartschool Assistent",
+  "name": "Smartschool AI Assistent",
   "version": "1.0.0",
-  "description": "AI-assistent voor Smartschool met 10+ gratis & betaalde providers.",
+  "description": "AI-assistent voor Smartschool met 10 gratis & betaalde providers.",
   "permissions": ["storage"],
   "host_permissions": [
     "https://api.openai.com/*",
