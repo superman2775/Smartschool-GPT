@@ -681,7 +681,7 @@
         padding: 20px;
         overflow-y: auto;
         display: none;
-        background: var(--color-base02, ${theme.base02});
+        background: var(--color-base01, ${theme.base01});
         border-top: 1px solid var(--color-base03, ${theme.base03});
         color: var(--color-text, ${theme.text});
       }
@@ -876,7 +876,7 @@
         padding: 20px;
         overflow-y: auto;
         display: none;
-        background: var(--color-base02, ${theme.base02});
+        background: var(--color-base01, ${theme.base01});
         border-top: 1px solid var(--color-base03, ${theme.base03});
         color: var(--color-text, ${theme.text});
       }
