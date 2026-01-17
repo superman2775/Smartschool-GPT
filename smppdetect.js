@@ -1,13 +1,10 @@
-//smpp webstore id
+// smpp webstore id
 const SMPP_ID = 'bdhficnphioomdjhdfbhdepjgggekodf';
 
-// Files that are guaranteed web-accessible by the manifest:
-// "media/*", "icons/*" and the icons block.
 const CANDIDATE_FILES = [
-  // Icons from manifest
-  'media/icons/smpp/16.png',
-  'media/icons/smpp/48.png',
   'media/icons/smpp/128.png',
+  'media/icons/smpp/48.png',
+  'media/icons/smpp/16.png',
 ];
 
 async function probeSmppFile(file) {
@@ -16,27 +13,32 @@ async function probeSmppFile(file) {
     const res = await fetch(url, { method: 'GET', cache: 'no-store' });
     return { file, ok: res.ok, status: res.status };
   } catch (e) {
-    return { file, ok: false, error: e };
+    // when error, smpp is not active
+    return { file, ok: false, status: 'ERR_FAILED' };
   }
 }
 
-export async function detectSmartschoolPlusPlus() {
+async function detectSmartschoolPlusPlus() {
   const results = await Promise.all(CANDIDATE_FILES.map(probeSmppFile));
   const firstHit = results.find(r => r.ok);
-
   const active = !!firstHit;
+  // log what we just learned
   console.log('Smartschool++ active:', active, 'first hit:', firstHit, 'all:', results);
 
-  if (active) {
-    document.documentElement.dataset.smartschoolPlusPlus = 'active';
-  } else {
-    document.documentElement.dataset.smartschoolPlusPlus = 'inactive';
+  // mark on DOM
+  document.documentElement.dataset.smartschoolPlusPlus = active ? 'active' : 'inactive';
+
+  // make result object
+  const result = { active, firstHit, results };
+
+  // save in localstorage so main.js can use it to apply special css
+  try {
+    localStorage.setItem('smppActive', JSON.stringify(result));
+  } catch (e) {
+    console.warn('Failed to save smppActive to localStorage', e);
   }
 
-  return { active, firstHit, results };
+  return result;
 }
-
-const result = await detectSmartschoolPlusPlus();
-localStorage.setItem('smppActive', JSON.stringify(result));
 
 detectSmartschoolPlusPlus();
