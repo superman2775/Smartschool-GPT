@@ -132,6 +132,51 @@
     },
   };
 
+  function isSmppActive() {
+    try {
+      const saved = JSON.parse(localStorage.getItem('smppActive') || '{}');
+      return !!saved.active;
+    } catch {
+      return false;
+    }
+  }
+
+  function getSmppThemeColors() {
+    const cs = getComputedStyle(document.documentElement);
+    const colorAccent = cs.getPropertyValue('--color-accent').trim();
+    const colorBase01 = cs.getPropertyValue('--color-base01').trim();
+    const colorBase02 = cs.getPropertyValue('--color-base02').trim();
+    const colorBase03 = cs.getPropertyValue('--color-base03').trim();
+    const colorText   = cs.getPropertyValue('--color-text').trim();
+    return { colorAccent, colorBase01, colorBase02, colorBase03, colorText };
+  }
+
+  // use smpp colors if active, else use the ones we chose
+  function resolveThemeColors() {
+    if (isSmppActive()) {
+      const c = getSmppThemeColors();
+      if (c.colorAccent && c.colorBase02) {
+        return {
+          accent: c.colorAccent,
+          base01: c.colorBase01 || '#ffffff',
+          base02: c.colorBase02 || '#f8fafc',
+          base03: c.colorBase03 || '#e5e7eb',
+          text:   c.colorText   || '#111827',
+        };
+      }
+    }
+
+    // non smpp colors
+    return {
+      accent: '#ff510d',
+      base01: '#ffffff',
+      base02: '#ff510d',
+      base03: '#e5e7eb',
+      text:   '#111827',
+    };
+  }
+
+
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", init);
   } else {
@@ -238,9 +283,9 @@
 
         <h4>Gebruik:</h4>
         <ol>
-          <li>Klik op een 🆓 gratis provider → maak account aan + maak API key</li>
-          <li>Selecteer dezelfde provider in dropdown</li>
-          <li>Plak key + model ID → klik <strong>💾 Opslaan</strong></li>
+          <li>Klik op een 🆓 gratis provider en maak account aan. Maak vervolgens een <strong>API key</strong> aan.</li>
+          <li>Selecteer dezelfde provider in de dropdown op de homepagina.</li>
+          <li>Plak de API key, kies eventueel een model ID → klik <strong>💾 Opslaan</strong></li>
           <li>Stel vraag → <strong>🚀 Verstuur</strong></li>
         </ol>
         <p><em>API keys blijven lokaal opgeslagen in je browser en kunnen dus niet bekeken worden door andere gebruikers of de eigenaar van Smartschool Assistent.</em></p>
@@ -555,93 +600,260 @@
 
   function injectStyles() {
     if (document.getElementById("ss-ai-styles")) return;
+
+    const theme = resolveThemeColors();
+
     const style = document.createElement("style");
     style.id = "ss-ai-styles";
     style.textContent = `
       .ss-ai-assistant-panel {
-        position: fixed; right: 20px; bottom: 20px; width: 450px; max-height: 80vh;
-        background: white; border-radius: 12px; box-shadow: 0 8px 32px rgba(0,0,0,0.3);
-        z-index: 10000; display: none; flex-direction: column; font-family: system-ui, sans-serif;
-        border: 1px solid #e0e0e0;
+        position: fixed;
+        right: 20px;
+        bottom: 20px;
+        width: 450px;
+        max-height: 80vh;
+        background: var(--color-base01, ${theme.base01});
+        border-radius: 12px;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+        z-index: 10000;
+        display: none;
+        flex-direction: column;
+        font-family: system-ui, sans-serif;
+        border: 1px solid var(--color-base03, ${theme.base03});
+        color: var(--color-text, ${theme.text});
       }
-      .ss-ai-panel-open { display: flex; }
-      .ss-ai-header {
-        background: linear-gradient(135deg, #ff7d0f 0%, #f20800 100%); color: white;
-        padding: 12px 16px; border-radius: 12px 12px 0 0; display: flex; justify-content: space-between;
-        align-items: center; font-weight: 600; cursor: grab; user-select: none;
-      }
-      .ss-ai-header:active { cursor: grabbing; }
-      .ss-ai-header-btns { display: flex; gap: 8px; }
-      .ss-ai-close, .ss-ai-help, .ss-ai-settings { 
-        background: none; border: none; color: white; font-size: 18px; cursor: pointer; 
-        padding: 4px 8px; border-radius: 4px; 
-      }
-      .ss-ai-close:hover, .ss-ai-help:hover, .ss-ai-settings:hover { 
-        background: rgba(255,255,255,0.2); 
-      }
-      
-      .ss-ai-body { 
-        padding: 16px; overflow-y: auto; flex: 1; display: block; 
-      }
-      
-      .ss-ai-help-panel {
-        flex: 1; padding: 20px; overflow-y: auto; display: none;
-        background: #f8fafc; border-top: 1px solid #e0e7ff;
-      }
-      
-      .ss-ai-help-panel h3 { margin: 0 0 16px; color: #1e40af; font-size: 16px; }
-      .ss-ai-help-panel h4 { margin: 20px 0 12px; color: #374151; }
-      .ss-ai-help-grid {
-        display: grid; gap: 12px; margin-bottom: 20px; font-size: 13px;
-      }
-      .ss-ai-help-grid div { 
-        padding: 12px; background: white; border-radius: 8px; 
-        border-left: 4px solid #3b82f6; box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-      }
-      .ss-ai-help-grid a { color: #3b82f6; text-decoration: none; font-weight: 500; }
-      .ss-ai-help-grid a:hover { text-decoration: underline; }
-      .ss-ai-help-grid code { 
-        background: #1f2937; color: #a5b4fc; padding: 2px 6px; border-radius: 4px; 
-        font-size: 12px; font-family: 'Courier New', monospace;
-      }
-      .ss-ai-help-panel ol { margin: 12px 0; padding-left: 24px; }
-      .ss-ai-help-panel li { margin-bottom: 8px; font-size: 13px; }
-      .ss-ai-help-panel p { margin: 12px 0; font-size: 13px; color: #6b7280; }
 
-      .ss-ai-body input, .ss-ai-body select, .ss-ai-body textarea {
-        width: 100%; box-sizing: border-box; padding: 8px 10px; border: 1px solid #ddd;
-        border-radius: 6px; font-size: 13px; font-family: inherit; margin-top: 4px;
+      .ss-ai-panel-open {
+        display: flex;
       }
-      .ss-ai-body input:focus, .ss-ai-body select:focus, .ss-ai-body textarea:focus {
-        outline: none; border-color: #667eea; box-shadow: 0 0 0 2px rgba(102,126,234,0.2);
+
+      .ss-ai-header {
+        background: var(--color-base02, ${theme.base02});
+        color: var(--color-text, ${theme.text});
+        padding: 12px 16px;
+        border-radius: 12px 12px 0 0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-weight: 600;
+        cursor: grab;
+        user-select: none;
       }
-      .ss-ai-save, .ss-ai-send {
-        width: 100%; padding: 12px; border: none; border-radius: 6px; font-size: 14px;
-        font-weight: 500; cursor: pointer; margin-bottom: 8px;
+
+      .ss-ai-header:active {
+        cursor: grabbing;
       }
-      .ss-ai-save { background: #10b981; color: white; }
-      .ss-ai-send { background: #3b82f6; color: white; }
-      .ss-ai-save:hover { background: #059669; }
-      .ss-ai-send:hover { background: #2563eb; }
-      .ss-ai-status {
-        padding: 8px 12px; border-radius: 6px; font-size: 13px; margin: 8px 0;
+
+      .ss-ai-header-btns {
+        display: flex;
+        gap: 8px;
+      }
+
+      .ss-ai-close,
+      .ss-ai-help,
+      .ss-ai-settings {
+        background: none;
+        border: none;
+        color: inherit;
+        font-size: 18px;
+        cursor: pointer;
+        padding: 4px 8px;
+        border-radius: 4px;
+      }
+
+      .ss-ai-close:hover,
+      .ss-ai-help:hover,
+      .ss-ai-settings:hover {
+        background: rgba(255,255,255,0.2);
+      }
+
+      .ss-ai-body {
+        padding: 16px;
+        overflow-y: auto;
+        flex: 1;
+        display: block;
+        background: var(--color-base01, ${theme.base01});
+        color: var(--color-text, ${theme.text});
+      }
+
+      .ss-ai-help-panel {
+        flex: 1;
+        padding: 20px;
+        overflow-y: auto;
+        display: none;
+        background: var(--color-base02, ${theme.base02});
+        border-top: 1px solid var(--color-base03, ${theme.base03});
+        color: var(--color-text, ${theme.text});
+      }
+
+      .ss-ai-help-panel h3 {
+        margin: 0 0 16px;
+        color: var(--color-text, ${theme.text});
+        font-size: 16px;
+      }
+
+      .ss-ai-help-panel h4 {
+        margin: 20px 0 12px;
+        color: var(--color-text, ${theme.text});
+      }
+
+      .ss-ai-help-grid {
+        display: grid;
+        gap: 12px;
+        margin-bottom: 20px;
+        font-size: 13px;
+      }
+
+      .ss-ai-help-grid div {
+        padding: 12px;
+        background: var(--color-base01, ${theme.base01});
+        border-radius: 8px;
+        border-left: 4px solid var(--color-accent, ${theme.accent});
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      }
+
+      .ss-ai-help-grid a {
+        color: var(--color-accent, ${theme.accent});
+        text-decoration: none;
         font-weight: 500;
       }
-      .ss-ai-status.ok { background: #d1fae5; color: #065f46; }
-      .ss-ai-status.error { background: #fee2e2; color: #991b1b; }
-      .ss-ai-status.loading { background: #fef3c7; color: #92400e; }
-      .ss-ai-answer {
-        background: #f8fafc; border-radius: 6px; padding: 16px; font-size: 13px;
-        max-height: 220px; overflow-y: auto; white-space: pre-wrap; line-height: 1.6;
-        border-left: 4px solid #3b82f6;
+
+      .ss-ai-help-grid a:hover {
+        text-decoration: underline;
       }
-      hr { border: none; height: 1px; background: #e5e7eb; margin: 16px 0; }
-      
-      /* Perfecte Smartschool topnav matching */
-        .ss-ai-assistant-btn {
-        background: #ff510d;
-        color: white;
-        border: 1px solid #ff510d;
+
+      .ss-ai-help-grid code {
+        background: #1f2937;
+        color: #a5b4fc;
+        padding: 2px 6px;
+        border-radius: 4px;
+        font-size: 12px;
+        font-family: 'Courier New', monospace;
+      }
+
+      .ss-ai-help-panel ol {
+        margin: 12px 0;
+        padding-left: 24px;
+      }
+
+      .ss-ai-help-panel li {
+        margin-bottom: 8px;
+        font-size: 13px;
+      }
+
+      .ss-ai-help-panel p {
+        margin: 12px 0;
+        font-size: 13px;
+        color: #6b7280;
+      }
+
+      .ss-ai-body label {
+        display: block;
+        margin-bottom: 10px;
+        font-size: 13px;
+      }
+
+      .ss-ai-body input,
+      .ss-ai-body select,
+      .ss-ai-body textarea {
+        width: 100%;
+        box-sizing: border-box;
+        padding: 8px 10px;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        font-size: 13px;
+        font-family: inherit;
+        margin-top: 4px;
+        background: var(--color-base01, ${theme.base01});
+        color: var(--color-text, ${theme.text});
+      }
+
+      .ss-ai-body input:focus,
+      .ss-ai-body select:focus,
+      .ss-ai-body textarea:focus {
+        outline: none;
+        border-color: var(--color-accent, ${theme.accent});
+        box-shadow: 0 0 0 2px rgba(102,126,234,0.2);
+      }
+
+      .ss-ai-save,
+      .ss-ai-send {
+        width: 100%;
+        padding: 12px;
+        border: none;
+        border-radius: 6px;
+        font-size: 14px;
+        font-weight: 500;
+        cursor: pointer;
+        margin-bottom: 8px;
+      }
+
+      .ss-ai-save {
+        background: #10b981;
+        color: #ffffff;
+      }
+
+      .ss-ai-send {
+        background: var(--color-base02, ${theme.base02});
+        color: #ffffff;
+      }
+
+      .ss-ai-save:hover {
+        background: #059669;
+      }
+
+      .ss-ai-send:hover {
+        background: #2563eb;
+      }
+
+      .ss-ai-status {
+        padding: 8px 12px;
+        border-radius: 6px;
+        font-size: 13px;
+        margin: 8px 0;
+        font-weight: 500;
+      }
+
+      .ss-ai-status.ok {
+        background: #d1fae5;
+        color: #065f46;
+      }
+
+      .ss-ai-status.error {
+        background: #fee2e2;
+        color: #991b1b;
+      }
+
+      .ss-ai-status.loading {
+        background: #fef3c7;
+        color: #92400e;
+      }
+
+      .ss-ai-answer {
+        background: var(--color-base03, ${theme.base03});
+        border-radius: 6px;
+        padding: 16px;
+        font-size: 13px;
+        max-height: 220px;
+        overflow-y: auto;
+        white-space: pre-wrap;
+        line-height: 1.6;
+        border-left: 4px solid var(--color-accent, ${theme.accent});
+        color: var(--color-text, ${theme.text});
+      }
+
+      hr {
+        border: none;
+        height: 1px;
+        background: #e5e7eb;
+        margin: 16px 0;
+      }
+
+      /* Topnav button */
+      .ss-ai-assistant-btn {
+        background: var(--color-accent, ${theme.accent});
+        color: #ffffff;
+        border: 1px solid var(--color-accent, ${theme.accent});
         padding: 10px 16px;
         border-radius: 6px;
         font-weight: 500;
@@ -651,24 +863,30 @@
         align-items: center;
         gap: 6px;
         transition: all 0.2s ease;
-        }
-        .ss-ai-assistant-btn:active {
-        background: ##ff510d;
+      }
+
+      .ss-ai-assistant-btn:active {
+        background: var(--color-accent, ${theme.accent});
         transform: translateY(0);
-        }
-        .ss-ai-settings-panel {
+      }
+
+      /* Settings panel */
+      .ss-ai-settings-panel {
         flex: 1;
         padding: 20px;
         overflow-y: auto;
         display: none;
-        background: #f8fafc;
-        border-top: 1px solid #e0e7ff;
+        background: var(--color-base02, ${theme.base02});
+        border-top: 1px solid var(--color-base03, ${theme.base03});
+        color: var(--color-text, ${theme.text});
       }
+
       .ss-ai-settings-panel h3 {
         margin: 0 0 16px;
-        color: #1e40af;
+        color: var(--color-text, ${theme.text});
         font-size: 16px;
       }
+
       .ss-ai-settings-panel label {
         display: flex;
         align-items: flex-start;
@@ -676,13 +894,16 @@
         margin-bottom: 12px;
         font-size: 13px;
       }
+
       .ss-ai-settings-panel input[type="checkbox"] {
         width: auto;
         margin-top: 2px;
       }
+
       .ss-ai-settings-panel span {
         flex: 1;
       }
+
       .ss-ai-settings-panel input,
       .ss-ai-settings-panel select {
         width: 100%;
@@ -693,7 +914,10 @@
         font-size: 13px;
         font-family: inherit;
         margin-top: 4px;
+        background: var(--color-base01, ${theme.base01});
+        color: var(--color-text, ${theme.text});
       }
+
       .ss-ai-settings-save {
         width: 100%;
         padding: 12px;
@@ -704,27 +928,32 @@
         cursor: pointer;
         margin-top: 4px;
         background: #f59e0b;
-        color: white;
+        color: #ffffff;
       }
+
       .ss-ai-settings-save:hover {
         background: #d97706;
       }
+
       .ss-ai-settings-status {
         padding: 8px 12px;
         border-radius: 6px;
         font-size: 13px;
         margin-top: 8px;
       }
+
       .ss-ai-personal-wrapper {
         display: flex;
         flex-direction: column;
         gap: 6px;
         width: 100%;
       }
+
       .ss-ai-personal-wrapper input,
       .ss-ai-personal-wrapper textarea {
         width: 100%;
       }
+
       .ss-ai-personal-note {
         margin: 4px 0 0;
         font-size: 11px;
