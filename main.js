@@ -64,6 +64,16 @@
       free: true,
       website: "https://openrouter.ai"
     },
+    hackclub_ai: {
+      label: "🆓 Hack Club AI (Gratis na ID verificatie)",
+      endpoint: "https://ai.hackclub.com/proxy/v1/chat/completions",
+      keyHeader: "Authorization",
+      keyPrefix: "Bearer ",
+      defaultModel: "deepseek/deepseek-v3.2",
+      type: "openai",
+      free: true,
+      website: "https://ai.hackclub.com"
+    },
     openai: {
       label: "💰 OpenAI",
       endpoint: "https://api.openai.com/v1/chat/completions",
@@ -278,7 +288,8 @@
         <div class="ss-ai-help-grid">
           <div><strong>🆓 <a href="https://console.groq.com" target="_blank">Groq</a></strong><br><code>llama-3.3-70b-versatile</code> (1M tokens/dag)</div>
           <div><strong>🆓 <a href="https://aistudio.google.com" target="_blank">Google AI Studio</a></strong><br><code>gemini-2.5-flash</code> (15 RPM)</div>
-          <div><strong>🆓 <a href="https://openrouter.ai" target="_blank">OpenRouter</a></strong><br><code>qwen/qwen-2.5-7b-instruct</code> or <code>meta-llama/llama-3.2-1b-instruct</code></div>
+          <div><strong>🆓 <a href="https://openrouter.ai" target="_blank">OpenRouter</a></strong><br><code>qwen/qwen-2.5-7b-instruct</code> <strong>of</strong> <code>meta-llama/llama-3.2-1b-instruct</code></div>
+          <div><strong>🆓 <a href="https://ai.hackclub.com" target="_blank">Hack Club AI</a></strong><br><code>deepseek/deepseek-v3.2</code> <strong>of</strong> <code>qwen/qwen3-next-80b-a3b-instruct</code></div>
         </div>
 
         <h4>Gebruik:</h4>
@@ -529,7 +540,7 @@
         style === "beleefd"
           ? "Gebruik een beleefde, rustige schrijfstijl zoals een behulpzaam persoon. Gebruik 'u' en 'jij' waar passend in de context. Stel amper vragen terug. Werk met voorbeelden en structuur aan de hand van de behoeften van de gebruiker."
           : style === "persoonlijk"
-          ? "Schrijf informeel en persoonlijk, met 'je' en 'jou'. Gebruik emoji's waar passend. Stel regelmatig vragen terug, maar niet meer dan 2. Wees vriendelijk en behulpzaam, zoals een goede vriend die je wil helpen. Gebruik voorbeelden en anekdotes om je antwoorden te verduidelijken."
+          ? "Schrijf informeel en persoonlijk, met 'je' en 'jou'. Gebruik emoji's waar passend. Stel af en toe vragen terug, maar niet meer dan 1 per keer. Wees vriendelijk en behulpzaam, zoals een goede vriend die je wil helpen. Gebruik voorbeelden en anekdotes om je antwoorden te verduidelijken. Maak structuur met emoji's, en maak het vooral gezellig en leuk."
           : "Schrijf direct en zakelijk, zonder overbodige uitleg. Focus op kerninformatie. Werk gestructureerd en puntsgewijs waar mogelijk. Stel geen vragen terug aan de gebruiker. Gebruik geen emoji's.";
 
       const styledQuestion = `${question}\n\n${styleText}${languageText ? " " + languageText : ""}${personalContext}`;
