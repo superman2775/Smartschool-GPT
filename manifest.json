@@ -20,7 +20,8 @@
     {
       "matches": ["https://*.smartschool.be/*"],
       "exclude_matches": ["*://*.smartschool.be/login", "*://www.smartschool.be/"],
-      "js": ["main.js"],
+      "js": ["smppdetect.js",
+            "main.js"],
       "run_at": "document_idle"
     }
   ]
