@@ -286,10 +286,10 @@
         <h3>🎯 Snelle start - GRATIS providers</h3>
         
         <div class="ss-ai-help-grid">
-          <div><strong>🆓 <a href="https://console.groq.com" target="_blank">Groq</a></strong><br><code>llama-3.3-70b-versatile</code> (1M tokens/dag)</div>
-          <div><strong>🆓 <a href="https://aistudio.google.com" target="_blank">Google AI Studio</a></strong><br><code>gemini-2.5-flash</code> (15 RPM)</div>
+          <div><strong>🆓 <a href="https://console.groq.com" target="_blank">Groq</a></strong><br><code>llama-3.3-70b-versatile</code> <strong>of</strong> <code>qwen/qwen3-32b</code></div>
+          <div><strong>🆓 <a href="https://aistudio.google.com" target="_blank">Google AI Studio</a></strong><br><code>gemini-2.5-flash</code> <strong>of</strong> <code>gemini-2.5-pro</code> (Strenge rate limits)</div>
           <div><strong>🆓 <a href="https://openrouter.ai" target="_blank">OpenRouter</a></strong><br><code>qwen/qwen-2.5-7b-instruct</code> <strong>of</strong> <code>meta-llama/llama-3.2-1b-instruct</code></div>
-          <div><strong>🆓 <a href="https://ai.hackclub.com" target="_blank">Hack Club AI</a></strong><br><code>deepseek/deepseek-v3.2</code> <strong>of</strong> <code>qwen/qwen3-next-80b-a3b-instruct</code></div>
+          <div><strong>🆓 <a href="https://ai.hackclub.com" target="_blank">Hack Club AI</a></strong><br><code>deepseek/deepseek-v3.2</code> <strong>of</strong> <code>qwen/qwen3-next-80b-a3b-instruct</code> <strong>of</strong> <code>google/gemini-2.5-flash</code></div>
         </div>
 
         <h4>Gebruik:</h4>
