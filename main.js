@@ -168,21 +168,23 @@
       if (c.colorAccent && c.colorBase02) {
         return {
           accent: c.colorAccent,
-          base01: c.colorBase01 || '#ffffff',
-          base02: c.colorBase02 || '#f8fafc',
-          base03: c.colorBase03 || '#e5e7eb',
-          text:   c.colorText   || '#111827',
+          base01: c.colorBase01     || '#ffffff',
+          base02: c.colorBase02     || '#f8fafc',
+          base03: c.colorBase03     || '#e5e7eb',
+          text:   c.colorText       || '#111827',
+          headertext: c.colorText   || '#111827',
         };
       }
     }
 
     // non smpp colors
     return {
-      accent: '#ff510d',
-      base01: '#ffffff',
-      base02: '#ff510d',
-      base03: '#e5e7eb',
-      text:   '#111827',
+      accent:     '#ff510d',
+      base01:     '#ffffff',
+      base02:     '#ff510d',
+      base03:     '#e5e7eb',
+      text:       '#111827',
+      headertext: '#ffffff', //since the header is orange, we need white text, and not black. This doesnt give issues with smpp, only without.
     };
   }
 
@@ -640,7 +642,7 @@
 
       .ss-ai-header {
         background: var(--color-base02, ${theme.base02});
-        color: var(--color-text, ${theme.text});
+        color: var(--color-headertext, ${theme.headertext});
         padding: 12px 16px;
         border-radius: 12px 12px 0 0;
         display: flex;
