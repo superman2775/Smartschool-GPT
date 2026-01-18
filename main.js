@@ -596,7 +596,24 @@
       if (!question) return els.status.showError("Geen vraag");
       if (p.keyHeader && !key) return els.status.showError("Geen API key");
 
-      els.status.textContent = "⏳ Versturen...";
+      const msgs = [
+        "⏳ AI is aan het denken",
+        "⏳ Even geduld aub",
+        "⏳ Bezig met antwoorden",
+        "⏳ Je antwoord komt eraan",
+        "⏳ Even wachten aub",
+        "⏳ AI is bezig met nadenken",
+        "⏳ Antwoord wordt gegenereerd",
+        "⏳ Even geduld alsjeblieft",
+        "⏳ Je antwoord is bijna klaar",
+        "⏳ AI werkt eraan",
+        "⏳ Wachten op een antwoord",
+        "⏳ Bezig met verwerken",
+        "⏳ Geen idee wat er gebeurt, wacht gewoon",
+        "⏳ AI is in slaap gevallen ofz, een eeuwigheidje geduld aub"
+      ];
+      els.status.textContent = msgs[Math.floor(Math.random() * msgs.length)];
+
       els.status.className = "ss-ai-status loading";
       els.answer.textContent = "";
 
