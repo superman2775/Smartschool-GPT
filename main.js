@@ -289,18 +289,52 @@
         
         <div class="ss-ai-help-grid">
           <div><strong>🆓 <a href="https://console.groq.com" target="_blank">Groq</a></strong><br><code>llama-3.3-70b-versatile</code> <strong>of</strong> <code>qwen/qwen3-32b</code></div>
-          <div><strong>🆓 <a href="https://aistudio.google.com" target="_blank">Google AI Studio</a></strong><br><code>gemini-2.5-flash</code> <strong>of</strong> <code>gemini-2.5-pro</code> (Strenge rate limits)</div>
           <div><strong>🆓 <a href="https://openrouter.ai" target="_blank">OpenRouter</a></strong><br><code>qwen/qwen-2.5-7b-instruct</code> <strong>of</strong> <code>meta-llama/llama-3.2-1b-instruct</code></div>
           <div><strong>🆓 <a href="https://ai.hackclub.com" target="_blank">Hack Club AI</a></strong><br><code>deepseek/deepseek-v3.2</code> <strong>of</strong> <code>qwen/qwen3-next-80b-a3b-instruct</code> <strong>of</strong> <code>google/gemini-2.5-flash</code></div>
+          <div><strong>🆓 <a href="https://aistudio.google.com" target="_blank">Google AI Studio</a></strong><br><code>gemini-2.5-flash</code> <strong>of</strong> <code>gemini-2.5-pro</code> (Strenge rate limits)</div>
         </div>
 
         <h4>Gebruik:</h4>
+        
         <ol>
-          <li>Klik op een 🆓 gratis provider en maak account aan. Maak vervolgens een <strong>API key</strong> aan.</li>
-          <li>Selecteer dezelfde provider in de dropdown op de homepagina.</li>
-          <li>Plak de API key, kies eventueel een model ID → klik <strong>💾 Opslaan</strong></li>
-          <li>Stel vraag → <strong>🚀 Verstuur</strong></li>
+          <li>
+            <strong>Kies een gratis provider en maak een account</strong>
+            <ul>
+              <li>Klik bovenaan op een <strong>🆓 gratis provider</strong> (bijvoorbeeld Groq, Google AI Studio, OpenRouter, …).</li>
+              <li>Je wordt doorgestuurd naar de website van die provider.</li>
+              <li>Maak daar een <strong>nieuw account</strong> aan (met email, Google, GitHub, …) en bevestig je e‑mail als dat gevraagd wordt.</li>
+            </ul>
+          </li>
+
+          <li>
+            <strong>Maak een API-key aan bij de provider</strong>
+            <ul>
+              <li>Ga in het dashboard van de provider naar de pagina <strong>API keys / Developer / Credentials</strong> (de naam kan verschillen per site).</li>
+              <li>Klik op <strong>“Create new key”</strong>, <strong>“New secret key”</strong> of <strong>“Generate API key”</strong>. (Hangt er van af per platform)</li>
+              <li>Kopieer de API-key die je te zien krijgt en bewaar die veilig; meestal kun je hem later niet nog eens volledig bekijken.</li>
+            </ul>
+          </li>
+
+          <li>
+            <strong>Vul de API-key in op deze pop-up</strong>
+            <ul>
+              <li>Ga terug naar de <strong>homepagina</strong> van deze app.</li>
+              <li>Kies in het keuzemenu <strong>exact dezelfde provider</strong> als waar je net een API-key hebt aangemaakt.</li>
+              <li>Plak je API-key in het daarvoor bedoelde tekstveld.</li>
+              <li>Optioneel: vul een <strong>model ID</strong> in (bijvoorbeeld <code>llama-3.3-70b-versatile</code>, <code>gemini-2.5-pro</code>, …), of maak gebruik van het standaard ingevulde model.</li>
+              <li>Klik op <strong>💾 Opslaan</strong> zodat de API-key bewaard wordt en bij volgende vragen automatisch gebruikt kan worden.</li>
+            </ul>
+          </li>
+
+          <li>
+            <strong>Korte tips</strong>
+            <ul>
+              <li>Deel je <strong>API-key nooit</strong> met anderen en zet hem niet publiek online (bijvoorbeeld op GitHub of in screenshots).</li>
+              <li>Heb je meerdere providers? Herhaal stap 1-3 per provider en wissel makkelijk via het menu op de homepagina.</li>
+            </ul>
+          </li>
         </ol>
+
         <p><em>API keys blijven lokaal opgeslagen in je browser en kunnen dus niet bekeken worden door andere gebruikers of de eigenaar van Smartschool Assistent.</em></p>
       </div>
 
@@ -566,6 +600,49 @@
       els.status.className = "ss-ai-status loading";
       els.answer.textContent = "";
 
+      //we do hackclub different. look at background.js if u wanna know why.
+      if (id === "hackclub_ai") {
+        chrome.runtime.sendMessage(
+          {
+            type: "hackclub-chat",
+            apiKey: key,
+            model,
+            messages: [
+              ...historyMessages,
+              { role: "user", content: styledQuestion }
+            ]
+          },
+          (res) => {
+            if (!res || !res.ok) {
+              els.status.textContent = "❌ Fout: " + (res?.error || "onbekend");
+              els.status.className = "ss-ai-status error";
+              return;
+            }
+
+            const data = res.data;
+            els.answer.textContent =
+              data.choices?.[0]?.message?.content || JSON.stringify(data, null, 2);
+            els.status.textContent = "✅ Klaar";
+            els.status.className = "ss-ai-status ok";
+
+            if (currentSettings.saveHistory) {
+              try {
+                const hist = JSON.parse(localStorage.getItem("ss_ai_history") || "[]");
+                hist.unshift({
+                  q: question,
+                  a: els.answer.textContent,
+                  t: Date.now()
+                });
+                localStorage.setItem("ss_ai_history", JSON.stringify(hist.slice(0, 20)));
+              } catch {}
+            }
+          }
+        );
+
+        return;
+      }
+
+      //everything that is not hackclub here
       try {
         const headers = { "Content-Type": "application/json" };
         if (p.keyHeader) headers[p.keyHeader] = p.keyPrefix + key;
@@ -582,23 +659,25 @@
           })
         });
 
-        if (!resp.ok) throw new Error(`${resp.status}`);
-        
+        if (!resp.ok) throw new Error(`${resp.status}`); //i like throwing stuff at people
+
         const data = await resp.json();
-        els.answer.textContent = data.choices?.[0]?.message?.content || JSON.stringify(data, null, 2);
+        els.answer.textContent =
+          data.choices?.[0]?.message?.content || JSON.stringify(data, null, 2);
         els.status.textContent = "✅ Klaar";
         els.status.className = "ss-ai-status ok";
-          if (currentSettings.saveHistory) {
-            try {
-              const hist = JSON.parse(localStorage.getItem("ss_ai_history") || "[]");
-              hist.unshift({
-                q: question,
-                a: els.answer.textContent,
-                t: Date.now()
-              });
-              localStorage.setItem("ss_ai_history", JSON.stringify(hist.slice(0, 20)));
-            } catch {}
-          }
+
+        if (currentSettings.saveHistory) {
+          try {
+            const hist = JSON.parse(localStorage.getItem("ss_ai_history") || "[]");
+            hist.unshift({
+              q: question,
+              a: els.answer.textContent,
+              t: Date.now()
+            });
+            localStorage.setItem("ss_ai_history", JSON.stringify(hist.slice(0, 20)));
+          } catch {}
+        }
       } catch (e) {
         els.status.textContent = `❌ Fout: ${e.message}`;
         els.status.className = "ss-ai-status error";
