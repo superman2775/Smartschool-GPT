@@ -188,6 +188,40 @@
     };
   }
 
+  // we use this light markdown parser to convert **bold**, # headings, - bullets and `code` to html
+  // this will be made bigger in the future (probably)
+  function lightMarkdown(md) {
+    if (!md) return "";
+
+    let h = md
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;");
+
+    // headers
+    h = h.replace(/^### (.*)$/gm, "<h3>$1</h3>");
+    h = h.replace(/^## (.*)$/gm, "<h2>$1</h2>");
+    h = h.replace(/^# (.*)$/gm, "<h1>$1</h1>");
+
+    // bullets
+    h = h.replace(/^- (.*)$/gm, "<li>$1</li>");
+    h = h.replace(/(<li>[\s\S]*?<\/li>)/gm, "<ul>$1</ul>");
+
+    // bold **text**
+    h = h.replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>");
+
+    // italics *text*
+    h = h.replace(/\*([^*]+)\*/g, "<em>$1</em>");
+
+    // inline code `code`
+    h = h.replace(/`([^`]+)`/g, "<code>$1</code>");
+
+    // paragraph breaks
+    h = h.replace(/\n{2,}/g, "</p><p>");
+    h = "<p>" + h + "</p>";
+
+    return h;
+  }
 
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", init);
@@ -555,7 +589,7 @@
       const language = (currentSettings.language || "").trim();
       const languageText = language
         ? `Beantwoord altijd in de volgende taal, tenzij de gebruiker expliciet iets anders vraagt: ${language}.`
-        : "";
+        : "Beantwoord de vragen in het Nederlands, tenzij de gebruiker de vraag in een andere taal stelt. ";
 
       const personalContextParts = [];
         if (currentSettings.userName) {
@@ -568,7 +602,7 @@
           personalContextParts.push(`Extra info over hoe je je moet gedragen/wat je moet weten: ${currentSettings.userExtra}.`);
         }
         const personalContext = personalContextParts.length
-          ? `\n\nPersoonlijke context gebruiker (voor jou als AI): ${personalContextParts.join(" ")}`
+          ? `\n\nPersoonlijke context en eisen gebruiker (voor jou als AI): ${personalContextParts.join(" ")}`
           : "";
 
 
@@ -637,8 +671,9 @@
             }
 
             const data = res.data;
-            els.answer.textContent =
-              data.choices?.[0]?.message?.content || JSON.stringify(data, null, 2);
+            const raw = data.choices?.[0]?.message?.content || JSON.stringify(data, null, 2);
+            els.answer.innerHTML = lightMarkdown(raw);
+
             els.status.textContent = "✅ Klaar";
             els.status.className = "ss-ai-status ok";
 
@@ -679,8 +714,8 @@
         if (!resp.ok) throw new Error(`${resp.status}`); //i like throwing stuff at people
 
         const data = await resp.json();
-        els.answer.textContent =
-          data.choices?.[0]?.message?.content || JSON.stringify(data, null, 2);
+        const raw = data.choices?.[0]?.message?.content || JSON.stringify(data, null, 2);
+        els.answer.innerHTML = lightMarkdown(raw);
         els.status.textContent = "✅ Klaar";
         els.status.className = "ss-ai-status ok";
 
