@@ -7,7 +7,7 @@
  */
 
 (function () {
-  const SS_AI_STORAGE_KEY = "ss_ai_config_v4";
+  const SS_AI_STORAGE_KEY = "ss_ai_config_v4"; // config v1-v3 were never officially released
   const SS_AI_SETTINGS_KEY = "ss_ai_settings_v1";
 
   function loadSettings() {
@@ -32,7 +32,7 @@
     } catch {}
   }
 
-
+//this is the big list of providers. make sure to add a defaultModel since users like it
   const PROVIDERS = {
     groq: {
       label: "🆓 Groq (gratis)",
@@ -141,7 +141,7 @@
       website: "https://console.anthropic.com"
     },
   };
-
+  // is smpp active according to our script?
   function isSmppActive() {
     try {
       const saved = JSON.parse(localStorage.getItem('smppActive') || '{}');
@@ -150,7 +150,7 @@
       return false;
     }
   }
-
+  // get smpp theme colors
   function getSmppThemeColors() {
     const cs = getComputedStyle(document.documentElement);
     const colorAccent = cs.getPropertyValue('--color-accent').trim();
@@ -222,13 +222,13 @@
 
     return h;
   }
-
+  // main init
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", init);
   } else {
     init();
   }
-
+  // other init shit
   function init() {
     const topnav = document.querySelector("nav.topnav");
     if (!topnav || document.querySelector(".ss-ai-assistant-btn")) return;
@@ -277,6 +277,7 @@
     panel.className = "ss-ai-assistant-panel";
     document.body.appendChild(panel);
 
+    //html of our popup
     panel.innerHTML = `
       <div class="ss-ai-header">
         <span>🤖 AI Assistent</span>
@@ -416,6 +417,7 @@
     setupDrag(panel);
   }
 
+  // drag and drop functionality
   function setupDrag(panel) {
     const header = panel.querySelector(".ss-ai-header");
     let isDragging = false;
@@ -453,6 +455,7 @@
     }
   }
 
+  //lots of event listseners
   function setupEventListeners(panel) {
     const cfg = loadConfig();
     const els = {
@@ -481,6 +484,7 @@
       settingsStatus: panel.querySelector(".ss-ai-settings-status")
     };
 
+    // load settings into the settings panel
     const settings = loadSettings();
     els.btnText.value = settings.buttonText || "Assistent";
     els.aiStyle.value = settings.aiStyle || "beleefd";
@@ -490,7 +494,7 @@
     if (els.userExtra) els.userExtra.value = settings.userExtra || "";
     if (els.language) els.language.value = settings.language || "";
 
-
+    // im to lazy to document the rest of the code so yeh goodbye
     els.status.showError = function(msg) {
       this.textContent = `❌ ${msg}`;
       this.className = "ss-ai-status error";
