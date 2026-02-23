@@ -371,6 +371,14 @@
         </ol>
 
         <p><em>API keys blijven lokaal opgeslagen in je browser en kunnen dus niet bekeken worden door andere gebruikers of de eigenaar van Smartschool Assistent.</em></p>
+
+        <p>
+          Nog steeds hulp nodig? Join onze 
+          <a href="https://discord.gg/TqvJjVejBU" target="_blank" rel="noopener noreferrer">
+            Discord Server
+          </a>!
+        </p>
+
       </div>
 
       <div class="ss-ai-settings-panel">
