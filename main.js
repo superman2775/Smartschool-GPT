@@ -392,7 +392,7 @@
             <option value="beleefd">Beleefd/Formeel</option>
             <option value="persoonlijk">Persoonlijk/Vriendelijk</option>
             <option value="direct">Direct/Zakelijk</option>
-            <option value="girlfriend">Girlfriend Emma (Use on your own risk)</option>
+            <option value="girlfriend">Girlfriend Emma (Gebruik op eigen risico)</option>
           </select>
         </label>
         <hr class="ss-ai-hr">
