@@ -305,7 +305,7 @@
         
         <button class="ss-ai-save">💾 Opslaan</button>
         
-        <hr>
+        <hr class="ss-ai-hr">
         
         <label>Vraag
           <textarea class="ss-ai-question" rows="3" placeholder="Stel je vraag hier..."></textarea>
@@ -386,7 +386,7 @@
         <label>Knop tekst
           <input class="ss-ai-btn-text" placeholder="Assistent">
         </label>
-        <hr>
+        <hr class="ss-ai-hr">
         <label>Antwoord formulering
           <select class="ss-ai-style">
             <option value="beleefd">Beleefd/Formeel</option>
@@ -394,19 +394,19 @@
             <option value="direct">Direct/Zakelijk</option>
           </select>
         </label>
-        <hr>
+        <hr class="ss-ai-hr">
         <label>Voorkeurstaal
           <div class="ss-ai-language-wrapper">
             <input class="ss-ai-language" placeholder="Bijv. Nederlands, English, Français">
             <p class="ss-ai-personal-note"><em>Laat leeg voor automatische taal op basis van je vraag.</em></p>
           </div>
         </label>
-        <hr>
+        <hr class="ss-ai-hr">
         <label>
           <input type="checkbox" class="ss-ai-history">
           <span>Gespreksgeschiedenis opslaan (Vorige 20 berichten)</span>
         </label>
-        <hr>
+        <hr class="ss-ai-hr">
         <label>Extra gegevens (optioneel)
           <div class="ss-ai-personal-wrapper">
             <input class="ss-ai-user-name" placeholder="Naam (bijv. Lisa)">
@@ -523,9 +523,22 @@
       els.key.value = pcfg.apiKey || "";
     }
 
-    els.provider.addEventListener("change", applyProvider);
-    els.provider.value = "groq";
+    els.provider.addEventListener("change", () => {
+      applyProvider();
+      const id = els.provider.value;
+      cfg.defaultProvider = id;
+      saveConfig(cfg);
+    });
+
+    // laad eerder gekozen provider als die bestaat, anders fallback naar groq (als iemand zin heeft om betere providers uit te zoeken, go ahead)
+    const defaultProvider = cfg.defaultProvider || "groq";
+    if (PROVIDERS[defaultProvider]) {
+      els.provider.value = defaultProvider;
+    } else {
+      els.provider.value = "groq";
+    }
     applyProvider();
+
 
     els.close.onclick = () => {
       panel.classList.remove("ss-ai-panel-open");
@@ -583,6 +596,8 @@
         apiKey: els.key.value.trim(),
         model: els.model.value.trim()
       };
+      cfg.defaultProvider = id;
+
       saveConfig(cfg);
       els.status.textContent = "✅ Opgeslagen";
       els.status.className = "ss-ai-status ok";
@@ -998,7 +1013,7 @@
         color: var(--color-text, ${theme.text});
       }
 
-      hr {
+      .ss-ai-hr {
         border: none;
         height: 1px;
         background: #e5e7eb;
