@@ -1,9 +1,11 @@
 {
   "manifest_version": 3,
   "name": "Smartschool AI Assistent",
-  "version": "1.2.1",
+  "version": "1.3.0",
   "description": "AI-assistent voor Smartschool met 10+ gratis & betaalde providers.",
-  "permissions": ["storage"],
+  "permissions": [
+    "storage"
+  ],
   "host_permissions": [
     "https://api.openai.com/*",
     "https://api.groq.com/*",
@@ -23,7 +25,9 @@
   },
   "content_scripts": [
     {
-      "matches": ["https://*.smartschool.be/*"],
+      "matches": [
+        "https://*.smartschool.be/*"
+      ],
       "exclude_matches": [
         "*://*.smartschool.be/login",
         "*://www.smartschool.be/"

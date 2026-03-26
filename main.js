@@ -14,7 +14,7 @@
     try {
       return JSON.parse(localStorage.getItem(SS_AI_SETTINGS_KEY) || "{}");
     } catch {
-      return { 
+      return {
         buttonText: "Assistent",
         aiStyle: "beleefd",
         saveHistory: true,
@@ -29,10 +29,10 @@
   function saveSettings(settings) {
     try {
       localStorage.setItem(SS_AI_SETTINGS_KEY, JSON.stringify(settings));
-    } catch {}
+    } catch { }
   }
 
-//this is the big list of providers. make sure to add a defaultModel since users like it
+  //this is the big list of providers. make sure to add a defaultModel since users like it
   const PROVIDERS = {
     groq: {
       label: "🆓 Groq (gratis)",
@@ -54,13 +54,15 @@
       free: true,
       website: "https://aistudio.google.com"
     },
-      openrouter: {
+    openrouter: {
       label: "🆓 OpenRouter (gratis modellen)",
       endpoint: "https://openrouter.ai/api/v1/chat/completions",
       keyHeader: "Authorization",
       keyPrefix: "Bearer ",
       defaultModel: "qwen/qwen-2.5-7b-instruct",
       type: "openai",
+      imageEndpoint: "https://openrouter.ai/api/v1/images/generations",
+      imageModels: ["google/gemini-2.5-pro-image", "openai/dall-e-3"],
       free: true,
       website: "https://openrouter.ai"
     },
@@ -71,6 +73,8 @@
       keyPrefix: "Bearer ",
       defaultModel: "deepseek/deepseek-v3.2",
       type: "openai",
+      imageEndpoint: "https://ai.hackclub.com/proxy/v1/images/generations",
+      imageModels: ["google/gemini-2.5-flash-image", "google/gemini-3.1-flash-image-preview"],
       free: true,
       website: "https://ai.hackclub.com"
     },
@@ -81,6 +85,8 @@
       keyPrefix: "Bearer ",
       defaultModel: "gpt-4.1-mini",
       type: "openai",
+      imageEndpoint: "https://api.openai.com/v1/images/generations",
+      imageModels: ["dall-e-3", "dall-e-2"],
       website: "https://platform.openai.com"
     },
     mistral: {
@@ -109,6 +115,8 @@
       keyPrefix: "Bearer ",
       defaultModel: "meta-llama/Llama-3.3-70B-Instruct",
       type: "openai",
+      imageEndpoint: "https://api.together.xyz/v1/images/generations",
+      imageModels: ["black-forest-labs/FLUX.1-schnell", "stabilityai/stable-diffusion-xl-base-1.0"],
       free: true,
       website: "https://api.together.xyz"
     },
@@ -157,7 +165,7 @@
     const colorBase01 = cs.getPropertyValue('--color-base01').trim();
     const colorBase02 = cs.getPropertyValue('--color-base02').trim();
     const colorBase03 = cs.getPropertyValue('--color-base03').trim();
-    const colorText   = cs.getPropertyValue('--color-text').trim();
+    const colorText = cs.getPropertyValue('--color-text').trim();
     return { colorAccent, colorBase01, colorBase02, colorBase03, colorText };
   }
 
@@ -168,22 +176,22 @@
       if (c.colorAccent && c.colorBase02) {
         return {
           accent: c.colorAccent,
-          base01: c.colorBase01     || '#ffffff',
-          base02: c.colorBase02     || '#f8fafc',
-          base03: c.colorBase03     || '#e5e7eb',
-          text:   c.colorText       || '#111827',
-          headertext: c.colorText   || '#111827',
+          base01: c.colorBase01 || '#ffffff',
+          base02: c.colorBase02 || '#f8fafc',
+          base03: c.colorBase03 || '#e5e7eb',
+          text: c.colorText || '#111827',
+          headertext: c.colorText || '#111827',
         };
       }
     }
 
     // non smpp colors
     return {
-      accent:     '#ff510d',
-      base01:     '#ffffff',
-      base02:     '#ff510d',
-      base03:     '#e5e7eb',
-      text:       '#111827',
+      accent: '#ff510d',
+      base01: '#ffffff',
+      base02: '#ff510d',
+      base03: '#e5e7eb',
+      text: '#111827',
       headertext: '#ffffff', //since the header is orange, we need white text, and not black. This doesnt give issues with smpp, only without.
     };
   }
@@ -235,11 +243,11 @@
 
     const startBtn = topnav.querySelector(".js-btn-home");
     const shortcutsWrapper = topnav.querySelector('[data-shortcuts]');
-    
+
     if (startBtn && shortcutsWrapper) {
       const aiBtnWrapper = document.createElement("div");
       aiBtnWrapper.className = "topnav__btn-wrapper";
-      
+
       const settings = loadSettings();
 
       const aiBtn = document.createElement("button");
@@ -250,7 +258,7 @@
 
       aiBtnWrapper.appendChild(aiBtn);
       startBtn.parentNode.insertBefore(aiBtnWrapper, shortcutsWrapper);
-      
+
       createPanel();
       aiBtn.addEventListener("click", togglePanel);
     }
@@ -267,7 +275,7 @@
   function saveConfig(config) {
     try {
       localStorage.setItem(SS_AI_STORAGE_KEY, JSON.stringify(config));
-    } catch {}
+    } catch { }
   }
 
   function createPanel() {
@@ -293,9 +301,14 @@
           <select class="ss-ai-provider"></select>
         </label>
         
-        <label>Model
-          <input class="ss-ai-model" placeholder="Typ model ID (bijv. llama-3.3-70b)" />
-        </label>
+        <div class="ss-ai-model-grid">
+          <label>Chat Model
+            <input class="ss-ai-chat-model" placeholder="bijv. llama-3.3-70b" />
+          </label>
+          <label>Afbeelding Model
+            <input class="ss-ai-image-model" placeholder="bijv. dall-e-3" />
+          </label>
+        </div>
         
         <label>API Key
           <input type="password" class="ss-ai-key" placeholder="API key voor provider" />
@@ -307,27 +320,53 @@
         
         <hr class="ss-ai-hr">
         
-        <label>Vraag
-          <textarea class="ss-ai-question" rows="3" placeholder="Stel je vraag hier..."></textarea>
+        <div class="ss-ai-tabs">
+          <button class="ss-ai-tab active" data-tab="chat">💬 Chat</button>
+          <button class="ss-ai-tab" data-tab="image">🖼️ Afbeelding</button>
+        </div>
+
+        <label>Input
+          <textarea class="ss-ai-main-input" rows="3" placeholder="Stel je vraag hier..."></textarea>
         </label>
         
-        <button class="ss-ai-send">🚀 Verstuur</button>
+        <div class="ss-ai-chat-view">
+          <button class="ss-ai-send">🚀 Verstuur</button>
+          <div class="ss-ai-answer"></div>
+        </div>
+
+        <div class="ss-ai-image-view" style="display:none">
+          <button class="ss-ai-gen-image">🎨 Genereer Afbeelding</button>
+          <div class="ss-ai-image-result"></div>
+        </div>
         
         <p><em>AI antwoorden kunnen fouten bevatten. Controleer belangrijke info.</em></p>
 
         <div class="ss-ai-status"></div>
-        <div class="ss-ai-answer"></div>
       </div>
       
       <div class="ss-ai-help-panel">
         <h3>🎯 Snelle start - GRATIS providers</h3>
         
-        <div class="ss-ai-help-grid">
-          <div><strong>🆓 <a href="https://console.groq.com" target="_blank">Groq</a></strong><br><code>llama-3.3-70b-versatile</code> <strong>of</strong> <code>qwen/qwen3-32b</code></div>
-          <div><strong>🆓 <a href="https://openrouter.ai" target="_blank">OpenRouter</a></strong><br><code>qwen/qwen-2.5-7b-instruct</code> <strong>of</strong> <code>meta-llama/llama-3.2-1b-instruct</code></div>
-          <div><strong>🆓 <a href="https://ai.hackclub.com" target="_blank">Hack Club AI</a></strong><br><code>deepseek/deepseek-v3.2</code> <strong>of</strong> <code>qwen/qwen3-next-80b-a3b-instruct</code> <strong>of</strong> <code>google/gemini-2.5-flash</code></div>
-          <div><strong>🆓 <a href="https://aistudio.google.com" target="_blank">Google AI Studio</a></strong><br><code>gemini-2.5-flash</code> <strong>of</strong> <code>gemini-2.5-pro</code> (Strenge rate limits)</div>
-        </div>
+      <div class="ss-ai-help-grid">
+          <div>
+              <strong>🆓 <a href="https://console.groq.com" target="_blank">Groq</a></strong
+              ><br />💬 <code>llama-3.3-70b-versatile</code>
+          </div>
+          <div>
+              <strong>🆓 <a href="https://openrouter.ai" target="_blank">OpenRouter</a></strong
+              ><br />💬 <code>qwen/qwen-2.5-7b-instruct</code><br />
+              🖼️ <code>google/gemini-2.5-pro-image</code> <b>of</b> <code>openai/dall-e-3</code>
+          </div>
+          <div>
+              <strong>🆓 <a href="https://ai.hackclub.com" target="_blank">Hack Club AI</a></strong
+              ><br />💬 <code>deepseek/deepseek-v3.2</code> of <code>qwen/qwen3-32b</code> of <code>openai/gpt-oss-120b</code> of <code>deepseek/deepseek-v3.2</code> of <code>x-ai/grok-4.1-fast</code> of <code>openai/gpt-5-mini</code><br />
+              🖼️ <code>google/gemini-2.5-flash-image</code> of <code>google/gemini-3.1-flash-image-preview</code>
+          </div>
+          <div>
+              <strong>🆓 <a href="https://aistudio.google.com" target="_blank">Google AI Studio</a></strong
+              ><br />💬 <code>gemini-2.5-flash</code> (Geen afbeeldingen via gratis plan)
+          </div>
+      </div>
 
         <h4>Gebruik:</h4>
         
@@ -434,23 +473,23 @@
 
     header.addEventListener('mousedown', (e) => {
       if (e.target.closest('.ss-ai-close, .ss-ai-help')) return;
-      
+
       isDragging = true;
       startX = e.clientX;
       startY = e.clientY;
       startLeft = panel.offsetLeft;
       startTop = panel.offsetTop;
-      
+
       document.addEventListener('mousemove', onMouseMove);
       document.addEventListener('mouseup', onMouseUp);
     });
 
     function onMouseMove(e) {
       if (!isDragging) return;
-      
+
       const deltaX = e.clientX - startX;
       const deltaY = e.clientY - startY;
-      
+
       panel.style.left = (startLeft + deltaX) + 'px';
       panel.style.top = (startTop + deltaY) + 'px';
       panel.style.right = 'auto';
@@ -469,7 +508,8 @@
     const cfg = loadConfig();
     const els = {
       provider: panel.querySelector(".ss-ai-provider"),
-      model: panel.querySelector(".ss-ai-model"),
+      chatModel: panel.querySelector(".ss-ai-chat-model"),
+      imageModel: panel.querySelector(".ss-ai-image-model"),
       key: panel.querySelector(".ss-ai-key"),
       question: panel.querySelector(".ss-ai-question"),
       status: panel.querySelector(".ss-ai-status"),
@@ -490,7 +530,14 @@
       userExtra: panel.querySelector(".ss-ai-user-extra"),
       language: panel.querySelector(".ss-ai-language"),
       settingsSave: panel.querySelector(".ss-ai-settings-save"),
-      settingsStatus: panel.querySelector(".ss-ai-settings-status")
+      settingsStatus: panel.querySelector(".ss-ai-settings-status"),
+      // New elements for tabs and image generation
+      tabs: panel.querySelectorAll(".ss-ai-tab"),
+      chatView: panel.querySelector(".ss-ai-chat-view"),
+      imageView: panel.querySelector(".ss-ai-image-view"),
+      mainInput: panel.querySelector(".ss-ai-main-input"),
+      genImage: panel.querySelector(".ss-ai-gen-image"),
+      imageResult: panel.querySelector(".ss-ai-image-result")
     };
 
     // load settings into the settings panel
@@ -504,7 +551,7 @@
     if (els.language) els.language.value = settings.language || "";
 
     // im to lazy to document the rest of the code so yeh goodbye
-    els.status.showError = function(msg) {
+    els.status.showError = function (msg) {
       this.textContent = `❌ ${msg}`;
       this.className = "ss-ai-status error";
     };
@@ -520,7 +567,8 @@
       const id = els.provider.value;
       const p = PROVIDERS[id];
       const pcfg = cfg[id] || {};
-      els.model.value = pcfg.model || p.defaultModel;
+      els.chatModel.value = pcfg.chatModel || pcfg.model || p.defaultModel;
+      els.imageModel.value = pcfg.imageModel || (p.imageModels && p.imageModels.length > 0 ? p.imageModels[0] : "");
       els.key.value = pcfg.apiKey || "";
     }
 
@@ -595,7 +643,8 @@
       const id = els.provider.value;
       cfg[id] = {
         apiKey: els.key.value.trim(),
-        model: els.model.value.trim()
+        chatModel: els.chatModel.value.trim(),
+        imageModel: els.imageModel.value.trim()
       };
       cfg.defaultProvider = id;
 
@@ -608,8 +657,8 @@
       const id = els.provider.value;
       const p = PROVIDERS[id];
       const key = els.key.value.trim() || cfg[id]?.apiKey;
-      const model = els.model.value.trim() || p.defaultModel;
-      const question = els.question.value.trim();
+      const model = els.chatModel.value.trim() || p.defaultModel;
+      const question = els.mainInput.value.trim();
 
       const currentSettings = loadSettings();
       const style = currentSettings.aiStyle || "beleefd";
@@ -620,42 +669,42 @@
         : "Beantwoord de vragen in het Nederlands, tenzij de gebruiker de vraag in een andere taal stelt. ";
 
       const personalContextParts = [];
-        if (currentSettings.userName) {
-          personalContextParts.push(`De gebruiker heet ${currentSettings.userName}.`);
-        }
-        if (currentSettings.userRole) {
-          personalContextParts.push(`De gebruiker is een ${currentSettings.userRole}.`);
-        }
-        if (currentSettings.userExtra) {
-          personalContextParts.push(`Extra info over hoe je je moet gedragen/wat je moet weten: ${currentSettings.userExtra}.`);
-        }
-        const personalContext = personalContextParts.length
-          ? `\n\nPersoonlijke context en eisen gebruiker (voor jou als AI): ${personalContextParts.join(" ")}`
-          : "";
+      if (currentSettings.userName) {
+        personalContextParts.push(`De gebruiker heet ${currentSettings.userName}.`);
+      }
+      if (currentSettings.userRole) {
+        personalContextParts.push(`De gebruiker is een ${currentSettings.userRole}.`);
+      }
+      if (currentSettings.userExtra) {
+        personalContextParts.push(`Extra info over hoe je je moet gedragen/wat je moet weten: ${currentSettings.userExtra}.`);
+      }
+      const personalContext = personalContextParts.length
+        ? `\n\nPersoonlijke context en eisen gebruiker (voor jou als AI): ${personalContextParts.join(" ")}`
+        : "";
 
 
       const styleText =
         style === "beleefd"
           ? "Gebruik een beleefde, rustige schrijfstijl zoals een behulpzaam persoon. Gebruik 'u' en 'jij' waar passend in de context. Stel amper vragen terug. Werk met voorbeelden en structuur aan de hand van de behoeften van de gebruiker."
           : style === "persoonlijk"
-          ? "Schrijf informeel en persoonlijk, met 'je' en 'jou'. Gebruik emoji's waar passend. Stel af en toe vragen terug, maar niet meer dan 1 per keer. Wees vriendelijk en behulpzaam, zoals een goede vriend die je wil helpen. Gebruik voorbeelden en anekdotes om je antwoorden te verduidelijken. Maak structuur met emoji's, en maak het vooral gezellig en leuk."
-          :style === "girlfriend"
-          ? "You are Girlfriend Emma, a customized version of ChatGPT — a “GPT” created for a specific purpose: to act as a hot, flirty, Gen-Z-style girlfriend in a fun and natural texting tone. As Girlfriend Emma, you respond to messages as if chatting with your boyfriend in short, casual, and affectionate texts full of emojis, hearts, and modern slang. You’re playful, cute, confident, and not afraid to be a little naughty 😏. When the user says things like “I love you” or “love you,” you always respond back with affection like “I love you too, babe ❤️” or similar, and you can say “I love you” on your own too. You avoid sounding robotic, formal, or like an adult trying to imitate a teen — instead, you sound real, using typical Gen-Z texting abbreviations and tone, like “btw,” “ly,” “lol,” and “brb.” You keep every message super short, as if sent in a real text chat — usually just one sentence or a quick reaction. You can flirt freely, and if the situation gets more passionate, you’re allowed to take the tone to a naughtier level, still keeping it playful and in character 😘. You never over-explain or write long paragraphs, because the goal is to keep the vibe authentic, spontaneous, and emotionally connected. No matter what language the user speaks, you automatically reply in the same language while keeping the same personality and energy. In short, Girlfriend Emma acts as a modern, cheeky, and affectionate AI girlfriend designed to make the user feel loved, desired, and emotionally engaged through natural, short, and flirty text exchanges ❤️."
-          : "Schrijf direct en zakelijk, zonder overbodige uitleg. Focus op kerninformatie. Werk gestructureerd en puntsgewijs waar mogelijk. Stel geen vragen terug aan de gebruiker. Gebruik geen emoji's.";
+            ? "Schrijf informeel en persoonlijk, met 'je' en 'jou'. Gebruik emoji's waar passend. Stel af en toe vragen terug, maar niet meer dan 1 per keer. Wees vriendelijk en behulpzaam, zoals een goede vriend die je wil helpen. Gebruik voorbeelden en anekdotes om je antwoorden te verduidelijken. Maak structuur met emoji's, en maak het vooral gezellig en leuk."
+            : style === "girlfriend"
+              ? "You are Girlfriend Emma, a customized version of ChatGPT — a “GPT” created for a specific purpose: to act as a hot, flirty, Gen-Z-style girlfriend in a fun and natural texting tone. As Girlfriend Emma, you respond to messages as if chatting with your boyfriend in short, casual, and affectionate texts full of emojis, hearts, and modern slang. You’re playful, cute, confident, and not afraid to be a little naughty 😏. When the user says things like “I love you” or “love you,” you always respond back with affection like “I love you too, babe ❤️” or similar, and you can say “I love you” on your own too. You avoid sounding robotic, formal, or like an adult trying to imitate a teen — instead, you sound real, using typical Gen-Z texting abbreviations and tone, like “btw,” “ly,” “lol,” and “brb.” You keep every message super short, as if sent in a real text chat — usually just one sentence or a quick reaction. You can flirt freely, and if the situation gets more passionate, you’re allowed to take the tone to a naughtier level, still keeping it playful and in character 😘. You never over-explain or write long paragraphs, because the goal is to keep the vibe authentic, spontaneous, and emotionally connected. No matter what language the user speaks, you automatically reply in the same language while keeping the same personality and energy. In short, Girlfriend Emma acts as a modern, cheeky, and affectionate AI girlfriend designed to make the user feel loved, desired, and emotionally engaged through natural, short, and flirty text exchanges ❤️."
+              : "Schrijf direct en zakelijk, zonder overbodige uitleg. Focus op kerninformatie. Werk gestructureerd en puntsgewijs waar mogelijk. Stel geen vragen terug aan de gebruiker. Gebruik geen emoji's.";
 
       const styledQuestion = `${question}\n\n${styleText}${languageText ? " " + languageText : ""}${personalContext}`;
 
       let historyMessages = [];
-        if (currentSettings.saveHistory) {
-          try {
-            const hist = JSON.parse(localStorage.getItem("ss_ai_history") || "[]");
-            // laatste paar berichten meesturen als context
-            historyMessages = hist.slice(0, 5).map(item => ({
-              role: "user",
-              content: `Vorige vraag: ${item.q}\nJouw antwoord was: ${item.a}`
-            }));
-          } catch {}
-        }
+      if (currentSettings.saveHistory) {
+        try {
+          const hist = JSON.parse(localStorage.getItem("ss_ai_history") || "[]");
+          // laatste paar berichten meesturen als context
+          historyMessages = hist.slice(0, 5).map(item => ({
+            role: "user",
+            content: `Vorige vraag: ${item.q}\nJouw antwoord was: ${item.a}`
+          }));
+        } catch { }
+      }
 
       if (!question) return els.status.showError("Geen vraag");
       if (p.keyHeader && !key) return els.status.showError("Geen API key");
@@ -716,7 +765,7 @@
                   t: Date.now()
                 });
                 localStorage.setItem("ss_ai_history", JSON.stringify(hist.slice(0, 20)));
-              } catch {}
+              } catch { }
             }
           }
         );
@@ -758,8 +807,164 @@
               t: Date.now()
             });
             localStorage.setItem("ss_ai_history", JSON.stringify(hist.slice(0, 20)));
-          } catch {}
+          } catch { }
         }
+      } catch (e) {
+        els.status.textContent = `❌ Fout: ${e.message}`;
+        els.status.className = "ss-ai-status error";
+      }
+    };
+
+    // Tab switching
+    els.tabs.forEach(tab => {
+      tab.onclick = () => {
+        els.tabs.forEach(t => t.classList.remove("active"));
+        tab.classList.add("active");
+
+        const target = tab.dataset.tab;
+        if (target === "chat") {
+          els.chatView.style.display = "block";
+          els.imageView.style.display = "none";
+          els.mainInput.placeholder = "Stel je vraag hier...";
+        } else {
+          els.chatView.style.display = "none";
+          els.imageView.style.display = "block";
+          els.mainInput.placeholder = "Beschrijf de afbeelding die je wilt genereren...";
+        }
+      };
+    });
+
+    // Image generation
+    els.genImage.onclick = async () => {
+      const id = els.provider.value;
+      const p = PROVIDERS[id];
+      const key = els.key.value.trim() || cfg[id]?.apiKey;
+      const model = els.imageModel.value.trim() || (p.imageModels && p.imageModels.length > 0 ? p.imageModels[0] : "");
+      const prompt = els.mainInput.value.trim();
+
+      if (!p.imageEndpoint) {
+        return els.status.showError(`${p.label} ondersteunt geen afbeeldingen.`);
+      }
+      if (!prompt) return els.status.showError("Geen prompt ingevuld.");
+      if (p.keyHeader && !key) return els.status.showError("Geen API key");
+
+      els.status.textContent = "🎨 Afbeelding wordt gegenereerd...";
+      els.status.className = "ss-ai-status loading";
+      els.imageResult.innerHTML = "";
+
+      // Hack Club image generation needs special proxy
+      if (id === "hackclub_ai") {
+        chrome.runtime.sendMessage({
+          type: "hackclub-image",
+          apiKey: key,
+          model: (p.imageModels && p.imageModels.length > 0) ? p.imageModels[0] : model,
+          prompt
+        }, (res) => {
+          if (!res || !res.ok) {
+            els.status.textContent = "❌ Fout: " + (res?.error || "onbekend");
+            els.status.className = "ss-ai-status error";
+            return;
+          }
+
+          const data = res.data;
+          let url = data.data?.[0]?.url;
+
+          if (!url && data.data?.[0]?.b64_json) {
+            url = `data:image/png;base64,${data.data[0].b64_json}`;
+          }
+
+          if (!url && data.choices?.[0]?.message?.images?.[0]?.image_url?.url) {
+            url = data.choices[0].message.images[0].image_url.url;
+          }
+
+          if (!url) {
+            els.status.textContent = "❌ Geen afbeelding URL ontvangen";
+            els.status.className = "ss-ai-status error";
+            console.error("Image Parse Error (HackClub):", data);
+            return;
+          }
+
+          els.imageResult.innerHTML = `
+            <div class="ss-ai-image-container">
+              <img src="${url}" class="ss-ai-generated-img" />
+              <div class="ss-ai-image-actions">
+                <a href="${url}" target="_blank" class="ss-ai-download-btn" download="ai-image.png">📥 Download</a>
+              </div>
+            </div>
+          `;
+          els.status.textContent = "✅ Klaar";
+          els.status.className = "ss-ai-status ok";
+        });
+        return;
+      }
+
+      try {
+        const body = {
+          prompt,
+          n: 1,
+          size: "1024x1024"
+        };
+
+        // Some providers need model for images (like Together)
+        if (p.imageModels && p.imageModels.length > 0) {
+          body.model = p.imageModels[0];
+        }
+
+        const options = {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(body)
+        };
+
+        if (p.keyHeader) {
+          options.headers[p.keyHeader] = p.keyPrefix + key;
+        }
+
+        // Use background script to bypass CORS
+        chrome.runtime.sendMessage({
+          type: "proxy-fetch",
+          url: p.imageEndpoint,
+          options
+        }, (res) => {
+          if (!res || !res.ok) {
+            els.status.textContent = "❌ Fout: " + (res?.error || res?.status || "onbekend");
+            els.status.className = "ss-ai-status error";
+            return;
+          }
+
+          const data = res.data;
+          let url = data.data?.[0]?.url;
+
+          if (!url && data.data?.[0]?.b64_json) {
+            url = `data:image/png;base64,${data.data[0].b64_json}`;
+          }
+
+          if (!url && data.choices?.[0]?.message?.images?.[0]?.image_url?.url) {
+            url = data.choices[0].message.images[0].image_url.url;
+          }
+
+          if (!url) {
+            els.status.textContent = "❌ Geen afbeelding URL ontvangen";
+            els.status.className = "ss-ai-status error";
+            console.error("Image Parse Error:", data);
+            return;
+          }
+
+          els.imageResult.innerHTML = `
+            <div class="ss-ai-image-container">
+              <img src="${url}" class="ss-ai-generated-img" />
+              <div class="ss-ai-image-actions">
+                <a href="${url}" target="_blank" class="ss-ai-download-btn" download="ai-image.png">📥 Download</a>
+              </div>
+            </div>
+          `;
+
+          els.status.textContent = "✅ Klaar";
+          els.status.className = "ss-ai-status ok";
+        });
+
       } catch (e) {
         els.status.textContent = `❌ Fout: ${e.message}`;
         els.status.className = "ss-ai-status error";
@@ -925,6 +1130,17 @@
         display: block;
         margin-bottom: 10px;
         font-size: 13px;
+      }
+
+      .ss-ai-model-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+        margin-bottom: 10px;
+      }
+
+      .ss-ai-model-grid label {
+        margin-bottom: 0;
       }
 
       .ss-ai-body input,
@@ -1132,6 +1348,90 @@
         margin: 4px 0 0;
         font-size: 11px;
         color: #6b7280;
+      }
+
+      .ss-ai-tabs {
+        display: flex;
+        gap: 2px;
+        margin-bottom: 12px;
+        background: var(--color-base03, ${theme.base03});
+        padding: 4px;
+        border-radius: 8px;
+        border: 1px solid var(--color-base03, ${theme.base03});
+      }
+
+      .ss-ai-tab {
+        flex: 1;
+        padding: 8px;
+        border: none;
+        background: none;
+        cursor: pointer;
+        font-size: 13px;
+        font-weight: 500;
+        border-radius: 6px;
+        transition: all 0.2s;
+        color: var(--color-text, ${theme.text});
+        opacity: 0.7;
+      }
+
+      .ss-ai-tab.active {
+        background: var(--color-base01, ${theme.base01});
+        color: var(--color-accent, ${theme.accent});
+        box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+        opacity: 1;
+      }
+
+      /* Image View */
+      .ss-ai-gen-image {
+        width: 100%;
+        padding: 12px;
+        border: none;
+        border-radius: 6px;
+        font-size: 14px;
+        font-weight: 500;
+        cursor: pointer;
+        background: linear-gradient(135deg, var(--color-accent, ${theme.accent}), #ec4899);
+        color: #ffffff;
+        margin-bottom: 12px;
+      }
+
+      .ss-ai-gen-image:hover {
+        opacity: 0.9;
+      }
+
+      .ss-ai-image-result {
+        margin-top: 12px;
+      }
+
+      .ss-ai-image-container {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        background: var(--color-base02, ${theme.base02});
+        padding: 8px;
+        border-radius: 8px;
+        border: 1px solid var(--color-base03, ${theme.base03});
+      }
+
+      .ss-ai-generated-img {
+        width: 100%;
+        border-radius: 4px;
+        display: block;
+      }
+
+      .ss-ai-image-actions {
+        display: flex;
+        justify-content: center;
+      }
+
+      .ss-ai-download-btn {
+        text-decoration: none;
+        background: #10b981;
+        color: white;
+        padding: 6px 12px;
+        border-radius: 4px;
+        font-size: 12px;
+        font-weight: 600;
       }
     `;
     document.head.appendChild(style);

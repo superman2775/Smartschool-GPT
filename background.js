@@ -27,4 +27,35 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
 
     return true; // async
   }
+
+  if (msg.type === "proxy-fetch") {
+    const { url, options } = msg;
+
+    fetch(url, options)
+      .then(async r => {
+        const data = await r.json();
+        sendResponse({ ok: r.ok, status: r.status, data });
+      })
+      .catch(err => sendResponse({ ok: false, error: err.message }));
+
+    return true;
+  }
+
+  if (msg.type === "hackclub-image") {
+    const { apiKey, model, prompt } = msg;
+
+    fetch("https://ai.hackclub.com/proxy/v1/images/generations", {
+      method: "POST",
+      headers: {
+        "Authorization": "Bearer " + apiKey,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ model, prompt, n: 1, size: "1024x1024" })
+    })
+      .then(r => r.json())
+      .then(data => sendResponse({ ok: true, data }))
+      .catch(err => sendResponse({ ok: false, error: err.message }));
+
+    return true;
+  }
 });
