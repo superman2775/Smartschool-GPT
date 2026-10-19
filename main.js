@@ -350,17 +350,17 @@
       <div class="ss-ai-help-grid">
           <div>
               <strong>🆓 <a href="https://console.groq.com" target="_blank">Groq</a></strong
-              ><br />💬 <code>llama-3.3-70b-versatile</code>
+              ><br />💬 <code>llama-3.3-70b-versatile</code> of <code>openai/gpt-oss-120b</code>
           </div>
           <div>
               <strong>🆓 <a href="https://openrouter.ai" target="_blank">OpenRouter</a></strong
-              ><br />💬 <code>qwen/qwen-2.5-7b-instruct</code><br />
-              🖼️ <code>google/gemini-2.5-pro-image</code> <b>of</b> <code>openai/dall-e-3</code>
+              ><br />💬 <code>google/gemma-4-31b-it:free</code><br />
+              🖼️ <code>tencent/hy-image-v3.5-preview</code>
           </div>
           <div>
               <strong>🆓 <a href="https://ai.hackclub.com" target="_blank">Hack Club AI</a></strong
-              ><br />💬 <code>deepseek/deepseek-v3.2</code> of <code>qwen/qwen3-32b</code> of <code>openai/gpt-oss-120b</code> of <code>deepseek/deepseek-v3.2</code> of <code>x-ai/grok-4.1-fast</code> of <code>openai/gpt-5-mini</code><br />
-              🖼️ <code>google/gemini-2.5-flash-image</code> of <code>google/gemini-3.1-flash-image-preview</code>
+              ><br />💬 <code>~google/gemini-flash-latest</code> of <code>~anthropic/claude-haiku-latest</code> of <code>~openai/gpt-luna-latest</code> of <code>~z-ai/glm-flash-latest</code><br />
+              🖼️ <code>google/gemini-nano-banana-2.1</code> of <code>openai/gpt-5-image-mini</code>
           </div>
           <div>
               <strong>🆓 <a href="https://aistudio.google.com" target="_blank">Google AI Studio</a></strong
